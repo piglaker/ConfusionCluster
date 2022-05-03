@@ -161,7 +161,9 @@ class SighanReader(BaseReader):
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_name_path)
 
-        path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
+        #path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
+
+        path_head = "./data/std"
 
         train_source_path = path_head + "/train.src"
         train_target_path = path_head + "/train.tgt"
@@ -185,7 +187,9 @@ class SighanReader(BaseReader):
         all_data = [ (all_source[i], all_target[i]) for i in range(len(all_source))]
 
         self.map_dict = {}
+
         print("[INFO] [Reader] [Build Map]")
+        
         for src_tgt in tqdm(all_data):
             src, tgt = src_tgt
             for i in range(len(src)):
