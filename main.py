@@ -35,27 +35,21 @@ from transformers.training_args import TrainingArguments
 import reader
 import model
 import runner
-
+from lib import FoolDataCollatorForSeq2Seq
 
 def main():
     # Args
 
-    
-
-    sighan_reader = reader.SIGHANReader()
-
-    # Dataset
-    dataset = sighan_reader.get_dataset()#get_dataset(training_args.dataset) 
+    sighan_reader = reader.SighanReader()
 
     # Model
     model = BertForMaskedLM.from_pretrained("hfl/chinese-roberta-wwm-ext")
 
     # Data Collator
+    data_collator = FoolDataCollatorForSeq2Seq()#my data collator  fix the length for bert.
 
-    
-    
     # Runner
-    runner = runner.ConfusionClusterRunner(
+    Runner = runner.ConfusionClusterRunner(
         model=model,
         args=None,#training_args,         
         reader=sighan_reader,
@@ -63,7 +57,7 @@ def main():
     )
 
     # Run
-    run_result = runner.run()
+    run_result = Runner.run()
 
     # Train
     #train_result = runner.train()

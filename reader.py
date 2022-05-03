@@ -2,6 +2,7 @@
 import os
 import sys
 import re
+from numpy import source
 
 from transformers import (
     AutoTokenizer, 
@@ -111,6 +112,9 @@ class ConfusionSetReader(BaseReader):
     def visulization(self):
         """
         """
+        print("Deprecated")
+        exit()
+
         assert self.vocab, "Error: Empty Vocab"
         print("[INFO] [Reader] [Visulization]")
 
@@ -148,14 +152,85 @@ class ConfusionSetReader(BaseReader):
 
 
 
-
-class SIGHANReader(BaseReader):
+class SighanReader(BaseReader):
     def __init__(self, ):
         """
         """
-        
-        
-        return
+
+        tokenizer_model_name_path="hfl/chinese-roberta-wwm-ext"
+
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_name_path)
+
+        path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
+
+        train_source_path = path_head + "/train.src"
+        train_target_path = path_head + "/train.tgt"
+        valid_source_path = path_head + "/valid.src"
+        valid_target_path = path_head + "/valid.tgt"#valid should be same to test ( sighan 15
+        test_source_path = path_head + "/test.src"
+        test_target_path = path_head + "/test.tgt"
+
+        train_source = []#shabb_reader(train_source_path)#[:2000]#[274144:]#for only sighan
+        train_target = []#shabb_reader(train_target_path)#[:2000]#[274144:]
+
+        valid_source = shabb_reader(valid_source_path)
+        valid_target = shabb_reader(valid_target_path)
+
+        test_source = shabb_reader(test_source_path)
+        test_target = shabb_reader(test_target_path)
+
+        all_source = train_source + valid_source + test_source
+        all_target = train_target + valid_target + test_target
+
+        all_data = [ (all_source[i], all_target[i]) for i in range(len(all_source))]
+
+        self.map_dict = {}
+        print("[INFO] [Reader] [Build Map]")
+        for src_tgt in tqdm(all_data):
+            src, tgt = src_tgt
+            for i in range(len(src)):
+                if src[i] != tgt[i]:
+                    key = (src[i], tgt[i])
+                    
+                    self.map_dict[key] = []
+
+        self.source = all_source
+        self.target = all_target
+
+        self.data = all_data
+
+        # map_dict = { (‘火','人') : [ () , (), () ] ....  }
+     
+        self.source_set = None
+        self.target_set = None
+
+    def init_dataset(self):
+        """
+        """
+        print("[INFO] [Reader] [Init_dataset]")
+        source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
+        target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
+
+        source_set["labels"] = target_set["input_ids"]
+        target_set["labels"] = target_set["input_ids"]
+
+        def transpose(inputs):
+            features = []
+            for i in tqdm(range(len(inputs["input_ids"]))):
+                #ugly fix for encoder model (the same length
+                features.append({key:inputs[key][i][:128] for key in inputs.keys()}) #we fix here (truncation 
+
+            return features
+
+        self.source_set = transpose(source_set)
+        self.target_set = transpose(target_set)
+
+    def get_dataset(self):
+
+        self.init_dataset()
+
+        return self.source_set, self.target_set
+
 
 
 
