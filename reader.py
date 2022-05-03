@@ -11,7 +11,7 @@ from transformers import (
 
 from tqdm import tqdm 
 
-
+from similar_score import calcuate
 import lib
 
 
@@ -208,6 +208,8 @@ class SighanReader(BaseReader):
         self.source_set = None
         self.target_set = None
 
+        self.ground_truth = None
+
     def init_dataset(self):
         """
         """
@@ -229,12 +231,27 @@ class SighanReader(BaseReader):
         self.source_set = transpose(source_set)
         self.target_set = transpose(target_set)
 
+        self.calculate_groundtruth()
+
+
     def get_dataset(self):
 
         self.init_dataset()
 
         return self.source_set, self.target_set
 
+
+    def calculate_groundtruth(self):
+        """
+        """
+        print("[INFO] [Reader] [Calculate GroundTruth]")
+        calcuator =  calcuate()
+
+        self.ground_truth = {}
+
+        for k, v in tqdm(self.map_dict.items()):
+            score = calcuator.similar(k[0],k[1])
+            self.ground_truth[k] = score
 
 
 

@@ -11,6 +11,8 @@ from torch.utils.data import DataLoader, Dataset, RandomSampler, SequentialSampl
 
 from tqdm import tqdm
 
+from similar_score import calcuate
+
 
 
 class BaseRunner():
@@ -63,7 +65,6 @@ class ConfusionClusterRunner():
         """
         """
         print("[INFO] [Runner] [Forward]")
-
 
         source_set, target_set = self.reader.get_dataset()
 
@@ -118,17 +119,31 @@ class ConfusionClusterRunner():
                 if source[j] != target[j]:
                     a = source_hiddens[i][j]
                     b = target_hiddens[i][j]
-                    self.reader.map_dict[(source[j], target[j])].append(cos(a, b))
+                    self.reader.map_dict[(source[j], target[j])].append(cos(a, b).numpy().tolist())
 
         return
 
-    def calcuate_score(self):
+    def calculate_score(self, result):
         """
         calculate the result comparing Model's Prediction with Ground Truth
         """
+        print("[INFO] [Runner] [Calcuate Score]")
 
+        score = 0
+        
+        i = 0
+        for k in self.reader.map_dict.keys():
+            pred_score = torch.mean(torch.tensor(self.reader.map_dict[k]))
+            #print(pred_score)
+            ground_truth = self.reader.ground_truth[k]
+            #print(ground_truth)
 
-        return
+            score += (pred_score - ground_truth) ** 2
+            i += 1
+
+        print("[INFO] [Runner] [Score]:", score / i)
+
+        return score
 
 
     def run(self):
@@ -139,14 +154,14 @@ class ConfusionClusterRunner():
         hiddens = self.forward()
 
         # similarity
-        cluster_result = self.calculate_similarity(hiddens)
+        result = self.calculate_similarity(hiddens)
 
         for k,v in self.reader.map_dict.items():
             print(k, v)
             #break
 
         # Score
-        score = self.calculate_score(cluster_result)
+        score = self.calculate_score(result)
  
         return
 

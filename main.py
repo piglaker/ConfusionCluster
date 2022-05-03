@@ -43,7 +43,7 @@ def main():
     sighan_reader = reader.SighanReader()
 
     # Model
-    model = BertForMaskedLM.from_pretrained("hfl/chinese-roberta-wwm-ext")
+    model = BertForMaskedLM.from_pretrained("/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/MaskedLM_datasetsighan_ReaLiSe_eval15_epoch10_bs128/checkpoint-22210")#"hfl/chinese-roberta-wwm-ext")
 
     # Data Collator
     data_collator = FoolDataCollatorForSeq2Seq()#my data collator  fix the length for bert.
