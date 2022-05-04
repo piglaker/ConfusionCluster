@@ -2,6 +2,8 @@
 import os
 import sys
 import re
+import pickle
+
 from numpy import source
 
 from transformers import (
@@ -161,19 +163,22 @@ class SighanReader(BaseReader):
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_name_path)
 
-        #path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
+        path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
 
-        path_head = "./data/std"
+        #path_head = "./data/std"
 
         train_source_path = path_head + "/train.src"
         train_target_path = path_head + "/train.tgt"
-        valid_source_path = path_head + "/valid.src"
-        valid_target_path = path_head + "/valid.tgt"#valid should be same to test ( sighan 15
+        valid_source_path = path_head + "/valid14.src"
+        valid_target_path = path_head + "/valid14.tgt"#valid should be same to test ( sighan 15
         test_source_path = path_head + "/test.src"
         test_target_path = path_head + "/test.tgt"
 
         train_source = []#shabb_reader(train_source_path)#[:2000]#[274144:]#for only sighan
         train_target = []#shabb_reader(train_target_path)#[:2000]#[274144:]
+
+        #train_source = shabb_reader(train_source_path)#[:2000]#[274144:]#for only sighan
+        #train_target = shabb_reader(train_target_path)#[:2000]#[274144:]
 
         valid_source = shabb_reader(valid_source_path)
         valid_target = shabb_reader(valid_target_path)
@@ -186,20 +191,30 @@ class SighanReader(BaseReader):
 
         all_data = [ (all_source[i], all_target[i]) for i in range(len(all_source))]
 
-        self.map_dict = {}
-
         print("[INFO] [Reader] [Build Map]")
-        
-        for src_tgt in tqdm(all_data):
-            src, tgt = src_tgt
-            for i in range(len(src)):
-                if src[i] != tgt[i]:
-                    key = (src[i], tgt[i])
-                    
-                    self.map_dict[key] = []
+        path = "map_dict2.pkl"
 
-        self.source = all_source
-        self.target = all_target
+        if os.path.exists(path):
+            with open(path, 'rb') as f:
+                self.map_dict = pickle.load(f)
+        else:
+
+            self.map_dict = {}
+
+            for src_tgt in tqdm(all_data):
+                src, tgt = src_tgt
+                for i in range(len(src)):
+                    if src[i] != tgt[i]:
+                        key = (src[i], tgt[i])
+
+                        self.map_dict[key] = []
+
+            with open(path, 'wb') as f:
+                pickle.dump(self.map_dict, f)
+        
+
+        self.source = [ i[:128] for i in all_source ]
+        self.target = [ i[:128] for i in all_target ]
 
         self.data = all_data
 
@@ -210,35 +225,49 @@ class SighanReader(BaseReader):
 
         self.ground_truth = None
 
+        self.init_dataset()
+
     def init_dataset(self):
         """
         """
         print("[INFO] [Reader] [Init_dataset]")
-        source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
-        target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
 
-        source_set["labels"] = target_set["input_ids"]
-        target_set["labels"] = target_set["input_ids"]
+        path = "encodings2.pkl"
 
-        def transpose(inputs):
-            features = []
-            for i in tqdm(range(len(inputs["input_ids"]))):
-                #ugly fix for encoder model (the same length
-                features.append({key:inputs[key][i][:128] for key in inputs.keys()}) #we fix here (truncation 
+        if os.path.exists(path):
+            with open(path, 'rb') as f:
+                self.encoding = pickle.load(f)
+        else:
 
-            return features
+            self.encoding = {}
+            
+            source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
+            target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
 
-        self.source_set = transpose(source_set)
-        self.target_set = transpose(target_set)
+            source_set["labels"] = target_set["input_ids"]
+            target_set["labels"] = target_set["input_ids"]
 
-        self.calculate_groundtruth()
+            def transpose(inputs):
+                features = []
+                for i in tqdm(range(len(inputs["input_ids"]))):
+                    #ugly fix for encoder model (the same length
+                    features.append({key:inputs[key][i][:128] for key in inputs.keys()}) #we fix here (truncation 
+
+                return features
+
+            self.encoding["source"] = transpose(source_set)
+            self.encoding["target"] = transpose(target_set)
+            self.encoding["masked"] = self.mask(transpose(source_set))
+            
+            with open(path, 'wb') as f:
+                pickle.dump(self.encoding, f)
+
+        #self.calculate_groundtruth()
 
 
     def get_dataset(self):
 
-        self.init_dataset()
-
-        return self.source_set, self.target_set
+        return self.encoding["source"], self.encoding["target"], self.encoding["masked"]
 
 
     def calculate_groundtruth(self):
@@ -247,11 +276,32 @@ class SighanReader(BaseReader):
         print("[INFO] [Reader] [Calculate GroundTruth]")
         calcuator =  calcuate()
 
-        self.ground_truth = {}
+        path = "ground_truth2.pkl"
 
-        for k, v in tqdm(self.map_dict.items()):
-            score = calcuator.similar(k[0],k[1])
-            self.ground_truth[k] = score
+        if os.path.exists(path):
+            print("[INFO] [Reader] [Loading ground truth]")
+            with open(path, 'rb') as f:
+                self.ground_truth = pickle.load(f)
+        else:
+
+            self.ground_truth = {}
+
+            for k, v in tqdm(self.map_dict.items()):
+                score = calcuator.similar(k[0],k[1])
+                self.ground_truth[k] = score
+
+            with open(path, 'wb') as f:
+                pickle.dump(self.ground_truth, f)
+
+    def mask(self, source):
+        """
+        """
+        for i in range(len(source)):
+            for j in range(len(source[i]["input_ids"])):
+                if source[i]["input_ids"][j] != source[i]["labels"][j]:
+                    source[i]["input_ids"][j] = 103
+        
+        return source
 
 
 

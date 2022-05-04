@@ -61,7 +61,7 @@ class calcuate():
         valueOne, valueTwo = None, None
         if charOne in self.hanzijiegouDict:
             valueOne = self.hanzijiegouDict[charOne]
-        if charTwo in self.sijiaobianmaDict:
+        if charTwo in self.hanzijiegouDict:
             valueTwo = self.hanzijiegouDict[charTwo]
         if not valueOne or not valueTwo:
             return 0
