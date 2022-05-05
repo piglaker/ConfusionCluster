@@ -40,7 +40,7 @@ class ConfusionClusterRunner():
 
         self.device = 'cuda'
 
-        self.batch_size = 128
+        self.batch_size = 64
 
         self.all_result = None
 
