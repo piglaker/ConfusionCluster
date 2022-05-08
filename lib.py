@@ -202,7 +202,7 @@ class FoolDataCollatorForSeq2Seq:
                     max_length = shared_max_length
                     label_pad_token_id= -100
                 else:
-                    label_pad_token_id = self.label_pad_token_id 
+                    label_pad_token_id = 0 
 
                 for f in f_copy: 
                     remainder = [label_pad_token_id] * (max_length - len(f[key]))

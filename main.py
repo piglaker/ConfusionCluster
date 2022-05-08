@@ -33,6 +33,9 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.tokenization_utils_base import BatchEncoding, PreTrainedTokenizerBase
 from transformers.training_args import TrainingArguments
 
+from chinesebert import ChineseBertForMaskedLM, ChineseBertTokenizerFast, ChineseBertConfig
+
+
 import reader
 import model
 import runner
@@ -40,8 +43,6 @@ from lib import FoolDataCollatorForSeq2Seq
 
 def main():
     # Args
-
-    sighan_reader = reader.SighanReader()
 
     # Model
 
@@ -51,34 +52,51 @@ def main():
         "hfl/chinese-roberta-wwm-ext", \
         "hfl/chinese-macbert-base", \
         "hfl/chinese-xlnet-base", \
-        "ShannonAI/ChineseBERT-base", \
+        "junnyu/ChineseBERT-base", \
         "hfl/chinese-electra-180g-base-discriminator", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Dot_datasetsighan_ReaLiSe_eval15_epoch10_bs128", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/MaskedLM_datasetsighan_ReaLiSe_eval15_epoch10_bs128/checkpoint-22210", \
         #"junnyu/ChineseBERT-base" \
         ]
 
-    name_list_bart = [
-        "fnlp/bart-base-chinese", 
-
+    name_list_2 = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/bert/checkpoint-5560", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/roberta/checkpoint-5560", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert/checkpoint-5560", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet/checkpoint-5560", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/chinesebert/checkpoint-5560", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/electra/checkpoint-3180", \
     ]
 
-    name_list_gpt = [
-        #"nghuyong/ernie-1.0", \
-        "uer/gpt2-chinese-cluecorpussmall", \
+
+    name_list_3 = [
+        "ReaLiSe"
     ]
 
     name = name_list[0]
-    
-    #name = name_list_gpt[0]
+ 
+    #name = name_list_2[2]
+
+    #name = name_list_3[-1]
 
     print("Model:", name)
 
-    model = BertForMaskedLM.from_pretrained(name)
+    if name in name_list_3:
+        model = name # we hack
+    elif name == "junnyu/ChineseBERT-base":
+        config = ChineseBertConfig.from_pretrained(name)
+        model = ChineseBertForMaskedLM.from_pretrained(name, config=config)
+    
+    else:
+        model = BertForMaskedLM.from_pretrained(name)
 
     #model = BartForConditionalGeneration.from_pretrained(name)
 
     #model = AutoModel.from_pretrained(name)
+
+    sighan_reader = reader.SighanReader(name)
+
+    confusion_reader = reader.ConfusionSetReader()
 
     # Data Collator
     data_collator = FoolDataCollatorForSeq2Seq()#my data collator  fix the length for bert.
@@ -88,6 +106,7 @@ def main():
         model=model,
         args=None,#training_args,         
         reader=sighan_reader,
+        confusion_reader=confusion_reader,
         data_collator=data_collator,      
     )
 

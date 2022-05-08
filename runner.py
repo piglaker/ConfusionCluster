@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 from similar_score import calcuate
 
-
+from transformers import DataCollatorWithPadding
 
 class BaseRunner():
     def __init__():
@@ -21,7 +21,7 @@ class BaseRunner():
         return
 
 class ConfusionClusterRunner():
-    def __init__(self, model, args, reader, data_collator):
+    def __init__(self, model, args, reader, confusion_reader,  data_collator):
         """
         """
         self.args = args
@@ -35,8 +35,17 @@ class ConfusionClusterRunner():
         self.confusionset = None
         
         self.reader = reader
-        
-        self.data_collator = data_collator
+
+        self.confusion_reader = confusion_reader
+
+        self.confusion_reader.run()
+
+        if model == "junnyu/ChineseBERT-base":
+
+            self.data_collator = data_collator
+        else:
+            self.data_collator = data_collator
+            #self.data_collator = DataCollatorWithPadding(self.reader.tokenizer, padding=True)
 
         self.device = 'cuda'
 
@@ -117,6 +126,23 @@ class ConfusionClusterRunner():
 
         print("[INFO] [Runner] [Predict]")
 
+        if isinstance(self.model, str):
+            # we hack
+            print("[INFO] [Runner] [Hack]")
+            path_1 = "./models/"+self.model+"/source_logits.pth" 
+            #with open(path_1 , "rb") as f:
+            #    source_host = pickle.load(f)
+            source_host = torch.load(path_1)
+
+            #with open("./models/"+self.model+"/masked_logits.pkl" , "rb") as f:
+            #    masked_host = pickle.load(f)  
+            
+            path_2 = "./models/"+self.model+"/masked_logits.pth"
+
+            masked_host = torch.load(path_2)
+
+            return source_host, masked_host
+
         source_set, _, masked_set = self.reader.get_dataset()
 
         source_host = []
@@ -178,10 +204,17 @@ class ConfusionClusterRunner():
 
                     noise = None
 
-                    all_possible_noise = masked_score.topk(3, dim=1)[-1][j]
+                    all_possible_noise = masked_score.topk(10, dim=1)[-1][j]
+
+                    if self.reader.tokenizer.decode(x) in self.confusion_reader.confusion:
+                        confusion_x = self.confusion_reader.confusion[self.reader.tokenizer.decode(x)]
+                    else:
+                        confusion_x = []
+                    
+                    # noise select
                     
                     for possible_noise in all_possible_noise:
-                        if possible_noise != x and possible_noise != y:                   
+                        if possible_noise != x and possible_noise != y and self.reader.tokenizer.decode(possible_noise) not in confusion_x:                   
                            noise = possible_noise
                            break
 

@@ -11,6 +11,10 @@ from transformers import (
 
 )
 
+import torch
+from chinesebert import ChineseBertForMaskedLM, ChineseBertTokenizerFast, ChineseBertConfig
+
+
 from tqdm import tqdm 
 
 from similar_score import calcuate
@@ -59,6 +63,7 @@ class ConfusionSetReader(BaseReader):
         
         self.vocab = None
 
+
     def run(self):
         """
         """
@@ -68,7 +73,7 @@ class ConfusionSetReader(BaseReader):
 
         self.init_vocab()
 
-        self.visulization()
+        #self.visulization()
 
     def build_confusion(self, data):
         """
@@ -155,13 +160,17 @@ class ConfusionSetReader(BaseReader):
 
 
 class SighanReader(BaseReader):
-    def __init__(self, ):
+    def __init__(self, tokenizer_model_name_path):
         """
         """
+        print("[INFO] [Reader] ", tokenizer_model_name_path) 
+        if tokenizer_model_name_path  == "junnyu/ChineseBERT-base":
+            self.tokenizer = ChineseBertTokenizerFast.from_pretrained(tokenizer_model_name_path)
 
-        tokenizer_model_name_path="hfl/chinese-roberta-wwm-ext"
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-roberta-wwm-ext")
 
-        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_model_name_path)
+        self.tokenizer_model_name_path = tokenizer_model_name_path#"junnyu/ChineseBERT-base" 
 
         path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
 
@@ -232,7 +241,11 @@ class SighanReader(BaseReader):
         """
         print("[INFO] [Reader] [Init_dataset]")
 
-        path = "encodings2.pkl"
+
+        if self.tokenizer_model_name_path != "junnyu/ChineseBERT-base":
+            path = "encodings2.pkl"
+        else:
+            path = "encodings3.pkl"
 
         if os.path.exists(path):
             with open(path, 'rb') as f:
@@ -241,34 +254,46 @@ class SighanReader(BaseReader):
 
             self.encoding = {}
             
-            source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
-            target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
+            self.masked = self.mask(self.source)
+
+            if self.tokenizer_model_name_path != "junnyu/ChineseBERT-base":
+                source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
+                target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
+                masked_set = self.tokenizer.batch_encode_plus(self.masked, return_token_type_ids=False)
+            else:
+                source_set = self.tokenizer(self.source, padding=True, truncation=True, max_length=256)
+                target_set = self.tokenizer(self.target, padding=True, truncation=True, max_length=256)
+                masked_set = self.tokenizer(self.masked, padding=True, truncation=True, max_length=256) 
 
             source_set["labels"] = target_set["input_ids"]
             target_set["labels"] = target_set["input_ids"]
+            masked_set["labels"] = target_set["input_ids"]
 
-            def transpose(inputs):
+            def transpose(inputs, truncation):
                 features = []
                 for i in tqdm(range(len(inputs["input_ids"]))):
                     #ugly fix for encoder model (the same length
-                    features.append({key:inputs[key][i][:128] for key in inputs.keys()}) #we fix here (truncation 
+                    max_lenth = 128 if truncation else 1000000
+                    features.append({key:inputs[key][i][:max_lenth] for key in inputs.keys()}) #we fix here (truncation 
 
                 return features
 
-            self.encoding["source"] = transpose(source_set)
-            self.encoding["target"] = transpose(target_set)
-            self.encoding["masked"] = self.mask(transpose(source_set))
-            
-            with open(path, 'wb') as f:
-                pickle.dump(self.encoding, f)
+            truncation = ( self.tokenizer_model_name_path != "junnyu/ChineseBERT-base" )
+
+            self.encoding["source"] = transpose(source_set, truncation=truncation)
+            self.encoding["target"] = transpose(target_set, truncation=truncation)
+            self.encoding["masked"] = transpose(masked_set, truncation=truncation)
+
+            #with open(path, 'wb') as f:
+            #    pickle.dump(self.encoding, f)
+
+        #self.masked = self.tokenizer.batch_decode([i['input_ids'] for i in self.encoding['masked']])
 
         #self.calculate_groundtruth()
 
 
     def get_dataset(self):
-
         return self.encoding["source"], self.encoding["target"], self.encoding["masked"]
-
 
     def calculate_groundtruth(self):
         """
@@ -296,12 +321,53 @@ class SighanReader(BaseReader):
     def mask(self, source):
         """
         """
+        masked = []
         for i in range(len(source)):
-            for j in range(len(source[i]["input_ids"])):
-                if source[i]["input_ids"][j] != source[i]["labels"][j]:
-                    source[i]["input_ids"][j] = 103
-        
-        return source
+            src, tgt = [ j for j in source[i] ], [ j for j in self.target[i] ]
+            new = [ j for j in source[i] ]
+            for j in range(len(src)):
+                if src[j] != tgt[j]:
+                    new[j] = "[MASK]"
+            
+            masked.append("".join(new))
+
+        return masked
+
+
+    def hack(self):
+        """
+        hack for ReaLiSe and other model and their fucking codes
+        """
+        source_tok, target_tok, masked_tok = self.encoding["source"], self.encoding["target"], self.encoding["masked"]
+
+        length = len(source_tok)
+
+        def convert(raw, tok):
+            new = []
+            for i in range(length):
+                tmp = {
+                    'id':None, \
+                    'src':raw[i], \
+                    'tgt':self.target[i], \
+                    'tokens_size':[ 1 for i in range(len(raw[i])) ], \
+                    'src_idx':tok[i]['input_ids'], \
+                    'tgt_idx':self.encoding['target'][i]['labels'], \
+                    'lengths':len(raw[i])
+                }
+
+                new.append(tmp)
+            return new
+
+
+        new_source, new_target, new_masked = convert(self.source, source_tok), convert(self.target, target_tok), convert(self.masked, masked_tok)
+
+        print(new_source)
+
+        with open("./models/realise/source.pkl", "wb") as f:
+            pickle.dump(new_source, f)
+
+        with open("./models/realise/masked.pkl", "wb") as f:
+            pickle.dump(new_masked, f)
 
 
 
@@ -309,9 +375,11 @@ def test():
     """
     """
 
-    Reader = ConfusionSetReader()
+    Reader = SighanReader()
 
-    Reader.run()
+    Reader.init_dataset()
+
+    Reader.hack()
 
     return 
 
