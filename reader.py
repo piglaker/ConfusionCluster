@@ -164,13 +164,17 @@ class SighanReader(BaseReader):
         """
         """
         print("[INFO] [Reader] ", tokenizer_model_name_path) 
-        if tokenizer_model_name_path  == "junnyu/ChineseBERT-base":
-            self.tokenizer = ChineseBertTokenizerFast.from_pretrained(tokenizer_model_name_path)
-
-        else:
-            self.tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-roberta-wwm-ext")
 
         self.tokenizer_model_name_path = tokenizer_model_name_path#"junnyu/ChineseBERT-base" 
+
+        self.is_chinesebert = ( 'chinesebert' in self.tokenizer_model_name_path or "ChineseBert" in self.tokenizer_model_name_path )
+        
+        print("is_chinese", self.is_chinesebert)
+
+        if self.is_chinesebert:
+            self.tokenizer = ChineseBertTokenizerFast.from_pretrained("junnyu/ChineseBERT-base" )#tokenizer_model_name_path)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-roberta-wwm-ext")
 
         path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
 
@@ -240,12 +244,11 @@ class SighanReader(BaseReader):
         """
         """
         print("[INFO] [Reader] [Init_dataset]")
-
-
-        if self.tokenizer_model_name_path != "junnyu/ChineseBERT-base":
-            path = "encodings2.pkl"
-        else:
+        
+        if self.is_chinesebert :
             path = "encodings3.pkl"
+        else:
+            path = "encodings2.pkl"
 
         if os.path.exists(path):
             with open(path, 'rb') as f:
@@ -256,14 +259,14 @@ class SighanReader(BaseReader):
             
             self.masked = self.mask(self.source)
 
-            if self.tokenizer_model_name_path != "junnyu/ChineseBERT-base":
+            if self.is_chinesebert:
+                source_set = self.tokenizer(self.source, padding=True, truncation=True, max_length=128)
+                target_set = self.tokenizer(self.target, padding=True, truncation=True, max_length=128)
+                masked_set = self.tokenizer(self.masked, padding=True, truncation=True, max_length=128) 
+            else :
                 source_set = self.tokenizer.batch_encode_plus(self.source, return_token_type_ids=False)#seems transformers max_length not work
                 target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
                 masked_set = self.tokenizer.batch_encode_plus(self.masked, return_token_type_ids=False)
-            else:
-                source_set = self.tokenizer(self.source, padding=True, truncation=True, max_length=256)
-                target_set = self.tokenizer(self.target, padding=True, truncation=True, max_length=256)
-                masked_set = self.tokenizer(self.masked, padding=True, truncation=True, max_length=256) 
 
             source_set["labels"] = target_set["input_ids"]
             target_set["labels"] = target_set["input_ids"]
@@ -278,7 +281,7 @@ class SighanReader(BaseReader):
 
                 return features
 
-            truncation = ( self.tokenizer_model_name_path != "junnyu/ChineseBERT-base" )
+            truncation = not ( self.is_chinesebert )
 
             self.encoding["source"] = transpose(source_set, truncation=truncation)
             self.encoding["target"] = transpose(target_set, truncation=truncation)

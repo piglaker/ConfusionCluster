@@ -75,7 +75,7 @@ def main():
 
     name = name_list[0]
  
-    #name = name_list_2[2]
+    #name = name_list_2[4]
 
     #name = name_list_3[-1]
 
@@ -83,7 +83,7 @@ def main():
 
     if name in name_list_3:
         model = name # we hack
-    elif name == "junnyu/ChineseBERT-base":
+    elif 'chinesebert' in name or "ChineseBert" in name:
         config = ChineseBertConfig.from_pretrained(name)
         model = ChineseBertForMaskedLM.from_pretrained(name, config=config)
     

@@ -40,12 +40,7 @@ class ConfusionClusterRunner():
 
         self.confusion_reader.run()
 
-        if model == "junnyu/ChineseBERT-base":
-
-            self.data_collator = data_collator
-        else:
-            self.data_collator = data_collator
-            #self.data_collator = DataCollatorWithPadding(self.reader.tokenizer, padding=True)
+        self.data_collator = data_collator
 
         self.device = 'cuda'
 
