@@ -201,6 +201,7 @@ class ConfusionClusterRunner():
 
                     all_possible_noise = masked_score.topk(10, dim=1)[-1][j]
 
+
                     if self.reader.tokenizer.decode(x) in self.confusion_reader.confusion:
                         confusion_x = self.confusion_reader.confusion[self.reader.tokenizer.decode(x)]
                     else:
@@ -210,9 +211,10 @@ class ConfusionClusterRunner():
                     
                     for possible_noise in all_possible_noise:
                         if possible_noise != x and possible_noise != y and self.reader.tokenizer.decode(possible_noise) not in confusion_x:                   
-                           noise = possible_noise
-                           break
+                            noise = possible_noise
 
+                            break
+                    
                     p_y_cx = score[j][y]
 
                     p_noise_cx = score[j][noise]
@@ -222,16 +224,16 @@ class ConfusionClusterRunner():
                     p_noise_cm = masked_score[j][noise]
 
                     result = {
-                        "x":x,
-                        "X":self.reader.tokenizer.decode(x),
-                        "y":y,
-                        "Y":self.reader.tokenizer.decode(y),
-                        "noise":noise,
-                        "Noise":self.reader.tokenizer.decode(noise),
-                        "p_y_cx":p_y_cx,
-                        "p_noise_cx":p_noise_cx,
-                        "p_y_cm":p_y_cm,
-                        "p_noise_cm":p_noise_cm,
+                                "x":x,
+                                "X":self.reader.tokenizer.decode(x),
+                                "y":y,
+                                "Y":self.reader.tokenizer.decode(y),
+                                "noise":noise,
+                                "Noise":self.reader.tokenizer.decode(noise),
+                                "p_y_cx":p_y_cx,
+                                "p_noise_cx":p_noise_cx,
+                                "p_y_cm":p_y_cm,
+                                "p_noise_cm":p_noise_cm,
                     }
 
                     result_host.append(result)
@@ -256,7 +258,7 @@ class ConfusionClusterRunner():
                 bad_mlm = result["p_noise_cm"] > result["p_y_cm"]
                 good_correction = result["p_y_cx"] > result["p_noise_cx"]
                 if  bad_mlm and good_correction :
-                    count += 1 
+                    count += 1
                 if bad_mlm:
                     mlm_count += 1
                 if good_correction:
