@@ -71,6 +71,9 @@ class ConfusionClusterRunner():
             return_dict=True, 
             output_hidden_states=True,  
         )
+        #print(BertOutput)
+        #print(torch.nan_to_num(BertOutput.logits[0][0]))
+        #exit()
 
         return torch.softmax(BertOutput.logits, 2).detach().cpu()
 
@@ -161,7 +164,8 @@ class ConfusionClusterRunner():
         for inputs in tqdm( source_dataloader ):
             inputs = self._prepare_inputs(inputs)
             scores = self.single_infer(inputs)
-
+            #print(scores)
+            #exit()
             source_host += scores
 
         masked_host = []
@@ -191,6 +195,9 @@ class ConfusionClusterRunner():
 
             result_host = []
 
+            # print(masked_score[0].shape)
+            # exit()
+
             for j in range(len(source)):
                 x = source[j]
                 y = target[j]
@@ -200,7 +207,6 @@ class ConfusionClusterRunner():
                     noise = None
 
                     all_possible_noise = masked_score.topk(10, dim=1)[-1][j]
-
 
                     if self.reader.tokenizer.decode(x) in self.confusion_reader.confusion:
                         confusion_x = self.confusion_reader.confusion[self.reader.tokenizer.decode(x)]
@@ -223,7 +229,10 @@ class ConfusionClusterRunner():
 
                     p_noise_cm = masked_score[j][noise]
 
+                    #print(p_y_cx, p_noise_cx, p_y_cm, p_noise_cm)
+
                     result = {
+                                "C":self.reader.tokenizer.decode(source),
                                 "x":x,
                                 "X":self.reader.tokenizer.decode(x),
                                 "y":y,
@@ -234,6 +243,7 @@ class ConfusionClusterRunner():
                                 "p_noise_cx":p_noise_cx,
                                 "p_y_cm":p_y_cm,
                                 "p_noise_cm":p_noise_cm,
+                                "e": p_y_cm / ( 1 - masked_score[j].max() ) , 
                     }
 
                     result_host.append(result)
@@ -253,10 +263,17 @@ class ConfusionClusterRunner():
         count = 0
         mlm_count = 0
         correct_count = 0
+
+        baseline_e = 0
+
         for example in self.all_result:
             for result in example:
                 bad_mlm = result["p_noise_cm"] > result["p_y_cm"]
                 good_correction = result["p_y_cx"] > result["p_noise_cx"]
+
+                if bad_mlm:
+                    baseline_e += result["e"]
+
                 if  bad_mlm and good_correction :
                     count += 1
                 if bad_mlm:
@@ -267,10 +284,14 @@ class ConfusionClusterRunner():
         length =  sum( [ len(i) for i in self.all_result] )
 
         print(
+            "[inter/mlm]", count / mlm_count, \
+            "[baseline]", baseline_e / mlm_count, \
             "[Bad_MLM and Good_Correction]:", count / length, \
             "[Bad_MLM]:", mlm_count / length, \
             "[Good_Correction]:", correct_count / length, \
         )
+
+
 
     def evaluate(self, scores):
         """
@@ -401,7 +422,7 @@ class ConfusionClusterRunner():
         report = self.analysis()
 
         #4.Evaluate
-        # metric = self.evaluate(scores)
+        metric = self.evaluate(scores)
 
         return
 

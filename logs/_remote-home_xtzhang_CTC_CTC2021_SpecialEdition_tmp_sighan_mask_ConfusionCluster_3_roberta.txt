@@ -1,0 +1,34 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/roberta
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/roberta
+is_chinese False
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[[{'C': '[CLS] 相 对 的 、 每 位 产 龄 妇 女 的 生 育 婴 儿 个 数 却 特 续 下 滑 。 这 表 示 全 球 出 现 适 合 年 龄 生 育 的 妇 女 不 想 生 育 的 现 象 。 [SEP]', 'x': 4294, 'X': '特', 'y': 2898, 'Y': '持', 'noise': tensor(5326), 'Noise': '继', 'p_y_cx': tensor(3.8196e-12), 'p_noise_cx': tensor(6.4461e-12), 'p_y_cm': tensor(0.1111), 'p_noise_cm': tensor(0.8886), 'e': tensor(0.9973)}], [{'C': '[CLS] 问 提 就 在 于, 从 1950 - 1960 年 虽 然 产 龄 妇 女 率 低, 但 平 均 每 位 产 龄 妇 女 生 育 的 婴 儿 率 高 。 [SEP]', 'x': 2990, 'X': '提', 'y': 7579, 'Y': '题', 'noise': tensor(4172), 'Noise': '烦', 'p_y_cx': tensor(7.7865e-11), 'p_noise_cx': tensor(9.6151e-17), 'p_y_cm': tensor(1.0000), 'p_noise_cm': tensor(2.4518e-08), 'e': tensor(8388607.)}], [{'C': '[CLS] 依 照 联 合 国 的 推 测 数 据, 未 来 的 妇 女 产 龄 会 持 续 到 2030 年 后 逐 渐 缓 和 而 产 龄 妇 女 的 婴 儿 生 育 率 也 会 在 那 个 时 候 缓 慢 的 下 降 到 2030 年 后 会 开 始 维 持 不 变 的 状 态 。 [SEP]', 'x': 2714, 'X': '慢', 'y': 1765, 'Y': '地', 'noise': tensor(5353), 'Noise': '缓', 'p_y_cx': tensor(3.0804e-18), 'p_noise_cx': tensor(4.0414e-09), 'p_y_cm': tensor(1.0680e-14), 'p_noise_cm': tensor(0.0031), 'e': tensor(3.4171e-12)}], [{'C': '[CLS] 以 前 战 争 时 代 没 什 么 医 料 设 备 像 现 在 那 么 普 遍, 但 一 口 家 庭 生 孩 子 的 比 率 增 多, 相 反 地 死 亡 的 数 量 也 更 多 。 [SEP]', 'x': 3160, 'X': '料', 'y': 4545, 'Y': '疗', 'noise': tensor(2110), 'Noise': '学', 'p_y_cx': tensor(2.4163e-14), 'p_noise_cx': tensor(1.8369e-15), 'p_y_cm': tensor(1.0000), 'p_noise_cm': tensor(1.3403e-06), 'e': tensor(364721.0938)}], [], [], [], [], [], [{'C': '[CLS] 时 间 的 经 过 、 时 代 的 改 变, 这 世 界 上 越 来 越 少 女 性 生 育 孩 子 了 。 或 许 是 因 为 经 济 因 素, 或 著 是 因 为 人 们 已 渐 渐 随 著 时 代 的 迁 变 而 对 于 人 生 有 了 新 的 想 法 。 [SEP]', 'x': 5865, 'X': '著', 'y': 5442, 'Y': '者', 'noise': tensor(6387), 'Noise': '许', 'p_y_cx': tensor(5.4278e-09), 'p_noise_cx': tensor(8.4002e-10), 'p_y_cm': tensor(0.0037), 'p_noise_cm': tensor(0.9963), 'e': tensor(1.0000)}]]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.6024340770791075 [baseline] tensor(inf) [Bad_MLM and Good_Correction]: 0.20176630434782608 [Bad_MLM]: 0.33491847826086957 [Good_Correction]: 0.7418478260869565
+[INFO] [Runner] [Evaluate]
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+tensor([ 102,  872, 1962,  106, 2769, 3221, 2476, 4263, 3152,  511,  102, 1557,
+        1557, 1557, 1557, 1557, 1557, 1557, 1557, 1557, 2769, 1557, 1557, 5439,
+        1557, 1557, 2769, 1557, 3143,  872, 1557, 1557, 2769, 1557, 1557, 1557,
+        1557, 1557,  872,  872,  872, 2769,  872, 3143, 1557, 1557, 1557, 1557,
+        1557, 2769, 1557, 1557, 5439, 1557,  872, 1557, 1557, 3143, 1557, 1557,
+        1557, 1557, 1557, 2769, 1557, 1557, 1557, 1557, 1557, 1557, 1557, 1557,
+        1557,  872, 1557, 1557, 1557, 1557, 1557, 1557, 1557, 1557, 1557, 1557,
+        1557, 1557, 1557, 1557, 1557, 2621, 1557, 1557, 1557, 1557, 1557, 1557,
+         872, 1557, 1557, 1557,  872, 1557,  872, 1557, 1557, 1557, 1557, 1557,
+        1557, 1557, 2769, 5439, 1557, 5439, 1557, 1557, 1557, 1557, 1557, 1557])
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+[SEP] 你 好! 我 是 张 爱 文 。 [SEP] 啊 啊 啊 啊 啊 啊 啊 啊 啊 我 啊 啊 老 啊 啊 我 啊 敬 你 啊 啊 我 啊 啊 啊 啊 啊 你 你 你 我 你 敬 啊 啊 啊 啊 啊 我 啊 啊 老 啊 你 啊 啊 敬 啊 啊 啊 啊 啊 我 啊 啊 啊 啊 啊 啊 啊 啊 啊 你 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 啊 恭 啊 啊 啊 啊 啊 啊 你 啊 啊 啊 你 啊 你 啊 啊 啊 啊 啊 啊 啊 我 老 啊 老 啊 啊 啊 啊 啊 啊
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+Compute Metrics for Aligned CSC
+Warning : metric score is too Low , maybe something goes wrong, check your codes please.
+{'F1_score': 0.0, 'Precision': 0.0, 'Recall': 0.0, 'Metric_time': 0.05832862854003906}
+Compute Metrics for Aligned CSC
+{'F1_score': 0.6641998149360014, 'Precision': 0.6660482374766853, 'Recall': 0.662361623616114, 'Metric_time': 0.058136940002441406}

@@ -1,0 +1,34 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/chinesebert
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/chinesebert
+is_chinese True
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[[{'x': 4294, 'X': '特', 'y': 2898, 'Y': '持', 'noise': tensor(5326), 'Noise': '继', 'p_y_cx': tensor(0.9087), 'p_noise_cx': tensor(0.0820), 'p_y_cm': tensor(0.9630), 'p_noise_cm': tensor(0.0256), 'e': tensor(26.0073)}], [{'x': 2990, 'X': '提', 'y': 7579, 'Y': '题', 'noise': tensor(7539), 'Noise': '題', 'p_y_cx': tensor(0.7998), 'p_noise_cx': tensor(4.1441e-05), 'p_y_cm': tensor(0.9996), 'p_noise_cm': tensor(0.0003), 'e': tensor(2513.9478)}], [{'x': 2714, 'X': '慢', 'y': 1765, 'Y': '地', 'noise': tensor(5353), 'Noise': '缓', 'p_y_cx': tensor(1.4871e-15), 'p_noise_cx': tensor(4.3510e-06), 'p_y_cm': tensor(2.0835e-08), 'p_noise_cm': tensor(0.0649), 'e': tensor(2.2598e-07)}], [{'x': 3160, 'X': '料', 'y': 4545, 'Y': '疗', 'noise': tensor(2110), 'Noise': '学', 'p_y_cx': tensor(0.1058), 'p_noise_cx': tensor(0.0107), 'p_y_cm': tensor(0.8177), 'p_noise_cm': tensor(0.0451), 'e': tensor(4.4866)}], [], [], [], [], [], [{'x': 5865, 'X': '著', 'y': 5442, 'Y': '者', 'noise': tensor(6387), 'Noise': '许', 'p_y_cx': tensor(0.9720), 'p_noise_cx': tensor(0.0043), 'p_y_cm': tensor(0.0468), 'p_noise_cm': tensor(0.9520), 'e': tensor(0.9744)}]]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.4032258064516129 [baseline] tensor(0.1570) [Bad_MLM and Good_Correction]: 0.18682065217391305 [Bad_MLM]: 0.4633152173913043 [Good_Correction]: 0.6739130434782609
+[INFO] [Runner] [Evaluate]
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+tensor([ 102,  872, 1962,  106, 2769, 3221, 2476, 4263, 3152,  511,  102,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,    0])
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]
+[SEP] 你 好! 我 是 张 爱 文 。 [SEP] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD] [PAD]
+Compute Metrics for Aligned CSC
+{'F1_score': 0.3325842696152223, 'Precision': 0.4252873563217169, 'Recall': 0.2730627306272559, 'Metric_time': 0.18531298637390137}
+Compute Metrics for Aligned CSC
+{'F1_score': 0.4798567591263229, 'Precision': 0.46608695652165805, 'Recall': 0.4944649446493552, 'Metric_time': 0.12590837478637695}

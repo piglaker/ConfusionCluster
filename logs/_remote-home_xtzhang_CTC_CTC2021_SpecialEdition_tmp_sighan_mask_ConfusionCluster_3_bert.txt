@@ -1,0 +1,34 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/bert
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/bert
+is_chinese False
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[[{'C': '[CLS] 相 对 的 、 每 位 产 龄 妇 女 的 生 育 婴 儿 个 数 却 特 续 下 滑 。 这 表 示 全 球 出 现 适 合 年 龄 生 育 的 妇 女 不 想 生 育 的 现 象 。 [SEP]', 'x': 4294, 'X': '特', 'y': 2898, 'Y': '持', 'noise': tensor(5326), 'Noise': '继', 'p_y_cx': tensor(8.2070e-21), 'p_noise_cx': tensor(7.8101e-20), 'p_y_cm': tensor(0.0476), 'p_noise_cm': tensor(0.9523), 'e': tensor(0.9980)}], [{'C': '[CLS] 问 提 就 在 于, 从 1950 - 1960 年 虽 然 产 龄 妇 女 率 低, 但 平 均 每 位 产 龄 妇 女 生 育 的 婴 儿 率 高 。 [SEP]', 'x': 2990, 'X': '提', 'y': 7579, 'Y': '题', 'noise': tensor(4157), 'Noise': '点', 'p_y_cx': tensor(3.5135e-13), 'p_noise_cx': tensor(8.8375e-20), 'p_y_cm': tensor(1.), 'p_noise_cm': tensor(3.9524e-09), 'e': tensor(inf)}], [{'C': '[CLS] 依 照 联 合 国 的 推 测 数 据, 未 来 的 妇 女 产 龄 会 持 续 到 2030 年 后 逐 渐 缓 和 而 产 龄 妇 女 的 婴 儿 生 育 率 也 会 在 那 个 时 候 缓 慢 的 下 降 到 2030 年 后 会 开 始 维 持 不 变 的 状 态 。 [SEP]', 'x': 2714, 'X': '慢', 'y': 1765, 'Y': '地', 'noise': tensor(5353), 'Noise': '缓', 'p_y_cx': tensor(1.4394e-24), 'p_noise_cx': tensor(1.9206e-16), 'p_y_cm': tensor(6.4484e-16), 'p_noise_cm': tensor(8.4332e-05), 'e': tensor(6.8733e-12)}], [{'C': '[CLS] 以 前 战 争 时 代 没 什 么 医 料 设 备 像 现 在 那 么 普 遍, 但 一 口 家 庭 生 孩 子 的 比 率 增 多, 相 反 地 死 亡 的 数 量 也 更 多 。 [SEP]', 'x': 3160, 'X': '料', 'y': 4545, 'Y': '疗', 'noise': tensor(4615), 'Noise': '療', 'p_y_cx': tensor(1.4168e-24), 'p_noise_cx': tensor(5.5556e-29), 'p_y_cm': tensor(1.), 'p_noise_cm': tensor(6.4097e-10), 'e': tensor(inf)}], [], [], [], [], [], [{'C': '[CLS] 时 间 的 经 过 、 时 代 的 改 变, 这 世 界 上 越 来 越 少 女 性 生 育 孩 子 了 。 或 许 是 因 为 经 济 因 素, 或 著 是 因 为 人 们 已 渐 渐 随 著 时 代 的 迁 变 而 对 于 人 生 有 了 新 的 想 法 。 [SEP]', 'x': 5865, 'X': '著', 'y': 5442, 'Y': '者', 'noise': tensor(6387), 'Noise': '许', 'p_y_cx': tensor(1.1630e-10), 'p_noise_cx': tensor(1.2702e-17), 'p_y_cm': tensor(0.6703), 'p_noise_cm': tensor(0.3297), 'e': tensor(2.0326)}]]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.6080808080808081 [baseline] tensor(inf) [Bad_MLM and Good_Correction]: 0.20448369565217392 [Bad_MLM]: 0.33627717391304346 [Good_Correction]: 0.75
+[INFO] [Runner] [Evaluate]
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+tensor([ 101,  872, 1962,  106, 2769, 3221, 2476, 4263, 3152,  511,  102, 1557,
+        1557,  872,  872, 1557, 1557,  872, 1557, 1557, 2476, 1557, 2476, 1557,
+        1557, 1557,  872,  872,  872,  872, 1557, 1557, 2769, 1557, 2476, 2476,
+        3152, 1557, 1557, 3152, 1557,  872,  872, 1557,  872,  872, 1557, 2769,
+        2769, 2476, 2476, 3152, 1557, 1557, 1557, 1557, 1557,  872,  872, 1557,
+         872, 1557, 1557, 2769, 1557, 2476, 5679, 3152, 1557, 1557, 1557, 1557,
+         872,  872,  872, 1557, 1557, 2769, 1557, 2476, 2476, 3152, 1557, 3152,
+        1557, 1557, 1557,  872,  872,  872,  872, 1557, 1557, 2769,  872, 2476,
+         872, 1557, 3152, 1557,  872,  872,  872,  872, 1557,  872, 1557, 1557,
+        2769, 2476, 2476, 1557, 3152, 1557, 3152, 1557,  872,  872,  872, 1557])
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP] 啊 啊 你 你 啊 啊 你 啊 啊 张 啊 张 啊 啊 啊 你 你 你 你 啊 啊 我 啊 张 张 文 啊 啊 文 啊 你 你 啊 你 你 啊 我 我 张 张 文 啊 啊 啊 啊 啊 你 你 啊 你 啊 啊 我 啊 张 良 文 啊 啊 啊 啊 你 你 你 啊 啊 我 啊 张 张 文 啊 文 啊 啊 啊 你 你 你 你 啊 啊 我 你 张 你 啊 文 啊 你 你 你 你 啊 你 啊 啊 我 张 张 啊 文 啊 文 啊 你 你 你 啊
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+Compute Metrics for Aligned CSC
+Warning : metric score is too Low , maybe something goes wrong, check your codes please.
+{'F1_score': 0.0, 'Precision': 0.0, 'Recall': 0.0, 'Metric_time': 0.08471274375915527}
+Compute Metrics for Aligned CSC
+{'F1_score': 0.6777777777276529, 'Precision': 0.6802973977693902, 'Recall': 0.6752767527674031, 'Metric_time': 0.07831048965454102}

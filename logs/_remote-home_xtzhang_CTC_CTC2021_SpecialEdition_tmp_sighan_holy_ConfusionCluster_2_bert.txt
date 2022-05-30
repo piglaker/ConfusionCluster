@@ -1,0 +1,33 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/bert
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/bert
+is_chinese False
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[[{'x': 4294, 'X': '特', 'y': 2898, 'Y': '持', 'noise': tensor(5326), 'Noise': '继', 'p_y_cx': tensor(0.8697), 'p_noise_cx': tensor(0.0633), 'p_y_cm': tensor(0.9486), 'p_noise_cm': tensor(0.0433), 'e': tensor(18.4602)}], [{'x': 2990, 'X': '提', 'y': 7579, 'Y': '题', 'noise': tensor(1384), 'Noise': '号', 'p_y_cx': tensor(0.9974), 'p_noise_cx': tensor(5.0065e-05), 'p_y_cm': tensor(0.9998), 'p_noise_cm': tensor(5.2209e-05), 'e': tensor(5011.6133)}], [{'x': 2714, 'X': '慢', 'y': 1765, 'Y': '地', 'noise': tensor(5353), 'Noise': '缓', 'p_y_cx': tensor(6.7422e-16), 'p_noise_cx': tensor(1.3372e-07), 'p_y_cm': tensor(1.5795e-07), 'p_noise_cm': tensor(0.0126), 'e': tensor(5.3315e-06)}], [{'x': 3160, 'X': '料', 'y': 4545, 'Y': '疗', 'noise': tensor(2110), 'Noise': '学', 'p_y_cx': tensor(0.5381), 'p_noise_cx': tensor(0.0012), 'p_y_cm': tensor(0.9546), 'p_noise_cm': tensor(0.0135), 'e': tensor(21.0477)}], [], [], [], [], [], [{'x': 5865, 'X': '著', 'y': 5442, 'Y': '者', 'noise': tensor(6387), 'Noise': '许', 'p_y_cx': tensor(0.8793), 'p_noise_cx': tensor(0.0048), 'p_y_cm': tensor(0.2180), 'p_noise_cm': tensor(0.7788), 'e': tensor(0.9854)}]]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.4167832167832168 [baseline] tensor(0.1417) [Bad_MLM and Good_Correction]: 0.20244565217391305 [Bad_MLM]: 0.4857336956521739 [Good_Correction]: 0.6773097826086957
+[INFO] [Runner] [Evaluate]
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+tensor([ 101,  872, 1962,  106, 2769, 3221, 2476, 4263, 3152,  511,  102,  100,
+         100,  100, 5869, 8024, 1520, 8024,  100, 3221, 2476, 4383, 4383, 4383,
+        4383,  511,  100,  100,  100, 2644, 1635, 8024,  100, 3221, 2476, 1649,
+        4383, 4383,  511, 4383,  511,  100,  100,  100, 2644, 1962, 8024,  100,
+        3221, 2476, 1649, 4383, 4383, 4383, 4383,  100,  100,  100,  100, 6468,
+        8024, 1962, 8024, 2769, 3221, 2476, 4263, 4383,  511,  100,  100,  100,
+         100,  100, 2644, 1962, 8024, 1635, 3221, 2476, 4263, 4383, 4383, 4383,
+        4383,  100,  100,  100,  100,  100, 2644, 1962, 8024,  100, 2476, 4383,
+        4383, 4383, 4383,  511,  100,  100, 3221,  100, 6468, 2644, 1962, 8024,
+        2769, 3221, 2476, 4263, 4383,  511, 4383,  100,  100,  100,  100,  100])
+[101, 872, 1962, 106, 2769, 3221, 2476, 4263, 3152, 511, 102]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP] [UNK] [UNK] [UNK] 董 ， 哥 ， [UNK] 是 张 玮 玮 玮 玮 。 [UNK] [UNK] [UNK] 您 嗨 ， [UNK] 是 张 嘉 玮 玮 。 玮 。 [UNK] [UNK] [UNK] 您 好 ， [UNK] 是 张 嘉 玮 玮 玮 玮 [UNK] [UNK] [UNK] [UNK] 谢 ， 好 ， 我 是 张 爱 玮 。 [UNK] [UNK] [UNK] [UNK] [UNK] 您 好 ， 嗨 是 张 爱 玮 玮 玮 玮 [UNK] [UNK] [UNK] [UNK] [UNK] 您 好 ， [UNK] 张 玮 玮 玮 玮 。 [UNK] [UNK] 是 [UNK] 谢 您 好 ， 我 是 张 爱 玮 。 玮 [UNK] [UNK] [UNK] [UNK] [UNK]
+[CLS] 你 好! 我 是 张 爱 文 。 [SEP]
+Compute Metrics for Aligned CSC
+{'F1_score': 0.33333333328607617, 'Precision': 0.4371257485028632, 'Recall': 0.26937269372688755, 'Metric_time': 0.10811805725097656}
+Compute Metrics for Aligned CSC
+{'F1_score': 0.4700625558034055, 'Precision': 0.4558058925475813, 'Recall': 0.4852398523984344, 'Metric_time': 0.10056352615356445}

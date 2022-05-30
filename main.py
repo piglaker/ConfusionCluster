@@ -35,11 +35,25 @@ from transformers.training_args import TrainingArguments
 
 from chinesebert import ChineseBertForMaskedLM, ChineseBertTokenizerFast, ChineseBertConfig
 
-
 import reader
 import model
 import runner
 from lib import FoolDataCollatorForSeq2Seq
+
+import sys
+
+
+class Logger(object):
+    def __init__(self, filename="Default.log"):
+        self.terminal = sys.stdout
+        self.log = open(filename, "a+")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+    def flush(self):
+        pass
 
 def main():
     # Args
@@ -50,22 +64,22 @@ def main():
         ""
         "hfl/chinese-bert-wwm-ext", \
         "hfl/chinese-roberta-wwm-ext", \
-        "hfl/chinese-macbert-base", \
-        "hfl/chinese-xlnet-base", \
+        #"hfl/chinese-macbert-base", \
+        #"hfl/chinese-xlnet-base", \
         "junnyu/ChineseBERT-base", \
-        "hfl/chinese-electra-180g-base-discriminator", \
+        #"hfl/chinese-electra-180g-base-discriminator", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Dot_datasetsighan_ReaLiSe_eval15_epoch10_bs128", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/MaskedLM_datasetsighan_ReaLiSe_eval15_epoch10_bs128/checkpoint-22210", \
         #"junnyu/ChineseBERT-base" \
         ]
 
     name_list_2 = [
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/bert/checkpoint-5560", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/roberta/checkpoint-5560", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert/checkpoint-5560", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet/checkpoint-5560", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/chinesebert/checkpoint-5560", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/electra/checkpoint-3180", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/bert", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/roberta", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/chinesebert", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/electra", \
     ]
 
 
@@ -73,11 +87,37 @@ def main():
         "ReaLiSe"
     ]
 
-    name = name_list[0]
+    name_list_4 = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/bert", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/roberta", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/nezha", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/chinesebert", \
+
+        
+    ]
+
+    name_list_5 = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/bert", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/roberta", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_mask/ConfusionCluster/3/chinesebert", \
+        
+    ]
+
+    #name = name_list[2]
  
     #name = name_list_2[4]
 
     #name = name_list_3[-1]
+
+    #name = name_list_4[2]
+
+    name = name_list_5[0]
+
+    output_path = "./logs/"+ name.replace("/", "_") + ".txt"
+
+    print("output_path:", output_path)
+
+    sys.stdout = Logger(output_path)
 
     print("Model:", name)
 
@@ -85,8 +125,7 @@ def main():
         model = name # we hack
     elif 'chinesebert' in name or "ChineseBert" in name:
         config = ChineseBertConfig.from_pretrained(name)
-        model = ChineseBertForMaskedLM.from_pretrained(name, config=config)
-    
+        model = ChineseBertForMaskedLM.from_pretrained(name, config=config) 
     else:
         model = BertForMaskedLM.from_pretrained(name)
 
