@@ -33,27 +33,22 @@ def _get_metrics(training_args=None):
             #print(sources[i])
             #print(preds[i])
             #print(labels[i])
+            #print(sources[i])
+            #print(preds[i])
+            #print(labels[i])
 
             source, pred, label = np.array(sources[i]), np.array(preds[i]), np.array(labels[i])
-
-            #print(source, preds, label)
 
             source, label = source[ source != -100], label[label != -100]
 
             source, label = source[source != 0],  label[label != 0]#pad idx for input_ids 
 
             #we guess pretrain Masked Language Model bert lack the surpvised sighan for 101 & 102 ( [CLS] & [SEP] ) , so we just ignore
-            #source, pred, label = np.where(source == 102, 101, source), np.where(pred == 102, 101, pred), np.where(label == 102, 101, label) 
+            source, pred, label = np.where(source == 102, 101, source), np.where(pred == 102, 101, pred), np.where(label == 102, 101, label) 
 
-            source, label = np.where(source == 102, 101, source), np.where(label == 102, 101, label)
+            source, pred, label = source[ source != 101 ], pred[ pred != 101 ], label[ label != 101]
 
-            source, label = source[ source != 101 ], label[ label != 101]
-
-            pred = pred[1:]
-
-            pred = np.where(pred == 102, 101, pred)
-
-            pred = pred[ pred != 101 ]
+            pred = pred[ pred != 100 ]
 
             source = source[:len(label)]
             pred = pred[:len(label)]
@@ -78,13 +73,13 @@ def _get_metrics(training_args=None):
                 exit(0)
 
             #if i < 5:
-            #print(source)
-            #print(pred)
-            #print(label)
+            #print("{"*6)
+            #print("source",source)
+            #print("pred", pred)
+            #print("label", label)
             #print((pred != source).any())
             #print((pred == label).all())
             #print((label != source).any())
-
 
             if not training_args:
                 # label: [101, 2,... 3, 102]

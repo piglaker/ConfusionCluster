@@ -46,7 +46,7 @@ import sys
 class Logger(object):
     def __init__(self, filename="Default.log"):
         self.terminal = sys.stdout
-        self.log = open(filename, "a+")
+        self.log = open(filename, "w+")
 
     def write(self, message):
         self.terminal.write(message)
@@ -57,6 +57,7 @@ class Logger(object):
 
 def main():
     # Args
+    topk = 1
 
     # Model
 
@@ -74,23 +75,39 @@ def main():
         ]
 
     name_list_2 = [
+ 
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/3/bert", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/3/roberta", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/3/chinesebert", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/electra", \
+
+         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/bert", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/roberta", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet", \
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/chinesebert", \
+
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/bert", \
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/roberta", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/macbert", \
         #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/xlnet", \
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/chinesebert", \
-        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/electra", \
+
     ]
 
 
     name_list_3 = [
-        "ReaLiSe"
+        "ReaLiSe",
+        "ReaLiSe_holy",
+        "PLOME_holy",
     ]
 
     name_list_4 = [
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/bert", \
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/roberta", \
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/nezha", \
+        #"/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/nezha", \
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/ConfusionCluster/2/chinesebert", \
 
         
@@ -103,17 +120,24 @@ def main():
         
     ]
 
-    #name = name_list[2]
+    name_list_6 = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy_mask/ConfusionCluster/3/bert",
+
+    ]
+
+    #name = name_list[0]
  
-    #name = name_list_2[4]
+    #name = name_list_2[8]
 
     #name = name_list_3[-1]
 
     #name = name_list_4[2]
 
-    name = name_list_5[0]
+    #name = name_list_5[2]
 
-    output_path = "./logs/"+ name.replace("/", "_") + ".txt"
+    name = name_list_6[0]
+
+    output_path = "./logs/"+ name.replace("/", "_") + "_topk_" + str(topk) +".txt"
 
     print("output_path:", output_path)
 
@@ -146,7 +170,8 @@ def main():
         args=None,#training_args,         
         reader=sighan_reader,
         confusion_reader=confusion_reader,
-        data_collator=data_collator,      
+        data_collator=data_collator,
+        topk=topk,    
     )
 
     # Run

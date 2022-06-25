@@ -1,14 +1,15 @@
 
+from enum import EnumMeta
 import os
 import sys
 import re
 import pickle
 
-from numpy import source
+from numpy import isin, iterable, source
 
 from transformers import (
     AutoTokenizer, 
-
+    BertTokenizer, 
 )
 
 import torch
@@ -169,16 +170,24 @@ class SighanReader(BaseReader):
 
         self.is_chinesebert = ( 'chinesebert' in self.tokenizer_model_name_path or "ChineseBert" in self.tokenizer_model_name_path )
         
+        self.is_ReaLiSe = ( self.tokenizer_model_name_path.find("ReaLiSe") >= 0 )
+
+        self.input_token = "input_ids" if not self.is_ReaLiSe else "src_idx"
+        self.label_token = "labels" if not self.is_ReaLiSe else "tgt_idx" 
+
         print("is_chinese", self.is_chinesebert)
+        print("is_ReaLiSe", self.is_ReaLiSe )
 
         if self.is_chinesebert:
             self.tokenizer = ChineseBertTokenizerFast.from_pretrained("junnyu/ChineseBERT-base" )#tokenizer_model_name_path)
+        elif self.is_ReaLiSe:
+            self.tokenizer = BertTokenizer.from_pretrained("/remote-home/xtzhang/CTC/CTC2021/milestones/ReaLise/output_holy")
         else:
             self.tokenizer = AutoTokenizer.from_pretrained("hfl/chinese-roberta-wwm-ext")
 
-        path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/std"
+        path_head = "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/data/rawdata/sighan/raw"
 
-        #path_head = "./data/std"
+        path_ReaLiSe = "/remote-home/xtzhang/CTC/CTC2021/milestones/ReaLise/data"
 
         train_source_path = path_head + "/train.src"
         train_target_path = path_head + "/train.tgt"
@@ -226,6 +235,10 @@ class SighanReader(BaseReader):
                 pickle.dump(self.map_dict, f)
         
 
+        if self.is_ReaLiSe:
+            self.test14_ReaLiSe = pickle.load(open(path_ReaLiSe+"/test.sighan14.pkl", 'rb'))
+            self.test15_ReaLiSe = pickle.load(open(path_ReaLiSe+"/test.sighan15.pkl", 'rb'))
+
         self.source = [ i[:128] for i in all_source ]
         self.target = [ i[:128] for i in all_target ]
 
@@ -247,14 +260,58 @@ class SighanReader(BaseReader):
         
         if self.is_chinesebert :
             path = "encodings3.pkl"
+        elif self.is_ReaLiSe:
+            path = "encodings4.pkl"
         else:
             path = "encodings2.pkl"
 
         if os.path.exists(path):
             with open(path, 'rb') as f:
+                print("Load Cache ...", path)
                 self.encoding = pickle.load(f)
-        else:
 
+        elif self.is_ReaLiSe:
+            
+            self.encoding = {}
+            _source = self.test14_ReaLiSe + self.test15_ReaLiSe
+
+            new_source = []
+            import collections
+            for i, e in enumerate(_source):
+                tmp = {}
+                for k,v in e.items():
+                    if isinstance(v, collections.Iterable):
+                        tmp[k] = v[:128]
+                    else:
+                        tmp[k] = 128
+                new_source.append(tmp)
+
+            _source = new_source
+
+            self.encoding["source"] = _source
+        
+            masked = [ ]
+
+            for i, element in enumerate(_source):
+                src, tgt = [ o for o in element[self.input_token]], [ o for o in element[self.label_token]]
+                new = [ j for j in element[self.input_token] ]
+                for j, char in enumerate(src):
+                    if char != tgt[j]:
+                        new[j] = 103
+
+                masked.append(new) 
+
+            from copy import deepcopy
+            self.masked = deepcopy(_source)
+            for i in range(len(self.masked)):
+                self.masked[i][self.input_token] =  masked[i]
+
+            self.encoding["masked"] = self.masked
+
+            with open(path, 'wb') as f:
+                pickle.dump(self.encoding, f)
+
+        else:
             self.encoding = {}
             
             self.masked = self.mask(self.source)
@@ -268,34 +325,25 @@ class SighanReader(BaseReader):
                 target_set = self.tokenizer.batch_encode_plus(self.target, return_token_type_ids=False)
                 masked_set = self.tokenizer.batch_encode_plus(self.masked, return_token_type_ids=False)
 
-            source_set["labels"] = target_set["input_ids"]
-            target_set["labels"] = target_set["input_ids"]
-            masked_set["labels"] = target_set["input_ids"]
-
-            def transpose(inputs, truncation):
-                features = []
-                for i in tqdm(range(len(inputs["input_ids"]))):
-                    #ugly fix for encoder model (the same length
-                    max_lenth = 128 if truncation else 1000000
-                    features.append({key:inputs[key][i][:max_lenth] for key in inputs.keys()}) #we fix here (truncation 
-
-                return features
+            source_set["labels"] = target_set[self.input_token]
+            target_set["labels"] = target_set[self.input_token]
+            masked_set["labels"] = target_set[self.input_token]
 
             truncation = not ( self.is_chinesebert )
 
-            self.encoding["source"] = transpose(source_set, truncation=truncation)
-            self.encoding["target"] = transpose(target_set, truncation=truncation)
-            self.encoding["masked"] = transpose(masked_set, truncation=truncation)
+            self.encoding["source"] = self.transpose(source_set, truncation=truncation)
+            self.encoding["target"] = self.transpose(target_set, truncation=truncation)
+            self.encoding["masked"] = self.transpose(masked_set, truncation=truncation)
 
-            #with open(path, 'wb') as f:
-            #    pickle.dump(self.encoding, f)
+            with open(path, 'wb') as f:
+                pickle.dump(self.encoding, f)
 
         #self.masked = self.tokenizer.batch_decode([i['input_ids'] for i in self.encoding['masked']])
 
         #self.calculate_groundtruth()
 
-
     def get_dataset(self):
+
         return self.encoding["source"], self.encoding["target"], self.encoding["masked"]
 
     def calculate_groundtruth(self):
@@ -336,6 +384,13 @@ class SighanReader(BaseReader):
 
         return masked
 
+    def transpose(self, inputs, truncation=True):
+        features = []
+        for i in tqdm(range(len(inputs[self.input_token]))):
+            #ugly fix for encoder model (the same length
+            max_lenth = 128 if truncation else 1000000
+            features.append({key:inputs[key][i][:max_lenth] for key in inputs.keys()}) #we fix here (truncation 
+        return features
 
     def hack(self):
         """
@@ -378,11 +433,11 @@ def test():
     """
     """
 
-    Reader = SighanReader()
+    Reader = SighanReader("ReaLiSe")
 
-    Reader.init_dataset()
+    #Reader.init_dataset()
 
-    Reader.hack()
+    #Reader.hack()
 
     return 
 

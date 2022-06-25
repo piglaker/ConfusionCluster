@@ -21,7 +21,7 @@ class BaseRunner():
         return
 
 class ConfusionClusterRunner():
-    def __init__(self, model, args, reader, confusion_reader,  data_collator):
+    def __init__(self, model, args, reader, confusion_reader,  data_collator, topk=5):
         """
         """
         self.args = args
@@ -47,6 +47,8 @@ class ConfusionClusterRunner():
         self.batch_size = 64
 
         self.all_result = None
+
+        self.topk = topk
 
         return
 
@@ -188,7 +190,7 @@ class ConfusionClusterRunner():
         all_result = []
 
         for i in tqdm(range(len(self.reader.data))):
-            source, target = self.reader.encoding["source"][i]["input_ids"], self.reader.encoding["target"][i]["input_ids"]
+            source, target = self.reader.encoding["source"][i][self.reader.input_token], self.reader.encoding["source"][i][self.reader.label_token]#self.reader.encoding["target"][i][self.reader.input_token]
             
             score = source_scores[i]
             masked_score = masked_scores[i]
@@ -206,7 +208,7 @@ class ConfusionClusterRunner():
 
                     noise = None
 
-                    all_possible_noise = masked_score.topk(10, dim=1)[-1][j]
+                    all_possible_noise = masked_score.topk(20, dim=1)[-1][j]
 
                     if self.reader.tokenizer.decode(x) in self.confusion_reader.confusion:
                         confusion_x = self.confusion_reader.confusion[self.reader.tokenizer.decode(x)]
@@ -218,9 +220,11 @@ class ConfusionClusterRunner():
                     for possible_noise in all_possible_noise:
                         if possible_noise != x and possible_noise != y and self.reader.tokenizer.decode(possible_noise) not in confusion_x:                   
                             noise = possible_noise
-
                             break
                     
+                    #if not noise:
+                    #    continue
+
                     p_y_cx = score[j][y]
 
                     p_noise_cx = score[j][noise]
@@ -243,7 +247,7 @@ class ConfusionClusterRunner():
                                 "p_noise_cx":p_noise_cx,
                                 "p_y_cm":p_y_cm,
                                 "p_noise_cm":p_noise_cm,
-                                "e": p_y_cm / ( 1 - masked_score[j].max() ) , 
+                                "e": p_y_cm / ( 1 - masked_score[j].max() + 1e-10 ) , 
                     }
 
                     result_host.append(result)
@@ -251,8 +255,6 @@ class ConfusionClusterRunner():
             all_result.append(result_host)
 
         self.all_result = all_result
-
-        print(all_result[:10])
 
         return all_result
 
@@ -273,11 +275,12 @@ class ConfusionClusterRunner():
 
                 if bad_mlm:
                     baseline_e += result["e"]
-
+                    #print(result)
                 if  bad_mlm and good_correction :
                     count += 1
                 if bad_mlm:
                     mlm_count += 1
+
                 if good_correction:
                     correct_count += 1
 
@@ -300,42 +303,123 @@ class ConfusionClusterRunner():
 
         source_scores, masked_scores = scores
 
+        print("TopK:", self.topk)
+
         #s = torch.tensor(source_scores)
 
         #print(s.shape)
 
-        preds = [ torch.argmax(s, dim=-1) for s in source_scores[1062:] ]
+        preds = source_scores[1062:]#[ torch.argmax(s, dim=-1) for s in source_scores[1062:] ]
 
-        masked_preds =  [ torch.argmax(s, dim=-1) for s in masked_scores[1062:] ]
+        preds14 = source_scores[:1062]#[ torch.argmax(s, dim=-1) for s in source_scores[:1062] ] 
 
-        sources = [ i["input_ids"] for i in self.reader.encoding["source"] ][1062:]
+        masked_preds =  masked_scores[1062:]#[ torch.argmax(s, dim=-1) for s in masked_scores[1062:] ]
 
-        labels = [ i["input_ids"] for i in self.reader.encoding["target"] ][1062:]
+        masked_preds14 =  masked_scores[:1062]#[ torch.argmax(s, dim=-1) for s in masked_scores[:1062] ] 
 
-        print(sources[0])
-        print(preds[0])
-        print(labels[0])
+        sources = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][1062:]
+        
+        sources14 = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][:1062] 
 
-        print(self.reader.tokenizer.decode(sources[0]))
-        print(self.reader.tokenizer.decode(preds[0]))
-        print(self.reader.tokenizer.decode(labels[0]))
+        masked = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][1062:] 
 
+        masked14 = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][:1062] 
+
+        labels = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][1062:]
+
+        labels14 = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][:1062] 
+
+        # print(sources[0])
+        # print(preds[0])
+        # print(masked_preds[0])
+        # print(labels[0])
+
+        # print(self.reader.tokenizer.decode(sources[1]))
+        # print(self.reader.tokenizer.decode(preds[1]))
+        # print(self.reader.tokenizer.decode(masked_preds[1]))
+        # print(self.reader.tokenizer.decode(labels[1]))
+
+        print("{14:")
+        self.metric((sources14, preds14, labels14))
+        print("{14 mask:")
+        self.metric((masked14, masked_preds14, labels14))
+        print("{15")
         self.metric((sources, preds, labels))
-
-        self.metric((sources, masked_preds, labels))
+        print("{15 mask")
+        self.metric((masked, masked_preds, labels))
 
         return
 
     def metric(self, input):
         """
         """
-        from core import _get_metrics
-        computer = _get_metrics()
-        #print(input[0])
-        evaluate_result = computer(input)
+        #from core import _get_metrics
+        #computer = _get_metrics()
+        #evaluate_result = computer(input)
+        #print(evaluate_result)
 
-        print(evaluate_result)
+        sources, preds, labels = input
 
+        tp, sent_p, sent_n = 0, 0, 0
+
+        pair = {}
+
+        for j in range(len(sources)):
+            
+            topk = torch.softmax(preds[j], dim=1).topk(self.topk, dim=1)[-1]#.T.reshape(5, -1) )
+
+            src, top5, label = torch.tensor(sources[j]), topk, torch.tensor(labels[j])
+                    
+            #if self.model.find("ReaLiSe") >= 0:
+            #    tmp = tmp[1:label.shape[0]-1, :]
+            #    src = src[1:label.shape[0]-1]
+            #    label = label[1:label.shape[0]-1]
+
+            tmp = top5[:, 0]
+
+            def cls2sep(x):
+                return torch.where(x != 101, x , 102)
+
+            src, tmp,  label = cls2sep(src), cls2sep(tmp), cls2sep(label) 
+
+            #print(src, tmp, label)
+            #print(self.reader.tokenizer.decode(src))
+            #print(self.reader.tokenizer.decode([i[0] for i in tmp]))
+            #print(self.reader.tokenizer.decode(label)) 
+            #exit()
+
+            ### ReaLiSe is Shit
+            # It change the x and output
+            
+            src = src[ src != -100]
+            src = src[ src != 0]
+            label = label[ label != 0]
+            label = label[ label != -100] 
+            tmp = tmp[:label.shape[0]]
+
+            pred = tmp
+
+            #print(pred, src, label)
+            #print(pred.shape, tmp.shape, src.shape, label.shape)
+            #exit()
+            res = (tmp == label.unsqueeze(-1)).sum(dim=1).sum()
+
+            if ( pred != src ).any() :
+                sent_p += 1
+                #if (res == label.shape[0]):
+                if (pred == label).all(): 
+                    tp += 1
+
+            if ( src != label).any():
+                sent_n += 1
+
+        precision = tp / (sent_p + 1e-10)
+
+        recall = tp / (sent_n + 1e-10)
+
+        F1_score = 2 * precision * recall / (precision + recall + 1e-10)
+
+        print("pre: ", precision, "recall: ", recall, "F1: ", F1_score)
         return 
 
     def calculate_similarity(self, hiddens):
@@ -349,7 +433,7 @@ class ConfusionClusterRunner():
         cos = nn.CosineSimilarity(dim=0, eps=1e-16)
 
         for i in tqdm(range(len(self.reader.data))):
-            source, target = self.reader.encoding["source"][i]["input_ids"], self.reader.encoding["target"][i]["input_ids"]
+            source, target = self.reader.encoding["source"][i][self.reader.input_token], self.reader.encoding["target"][i][self.reader.input_token]
 
             for j in range(len(source)):
                 if source[j] != target[j]:
