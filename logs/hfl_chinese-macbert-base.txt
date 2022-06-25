@@ -1,3 +1,0 @@
-Model: hfl/chinese-macbert-base
-[INFO] [Reader]  hfl/chinese-macbert-base
-is_chinese False
