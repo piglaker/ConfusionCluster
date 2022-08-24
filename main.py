@@ -127,7 +127,7 @@ def main():
 
     #name = name_list[0]
  
-    #name = name_list_2[8]
+    name = name_list_2[2]
 
     #name = name_list_3[-1]
 
@@ -135,7 +135,7 @@ def main():
 
     #name = name_list_5[2]
 
-    name = name_list_6[0]
+    #name = name_list_6[0]
 
     output_path = "./logs/"+ name.replace("/", "_") + "_topk_" + str(topk) +".txt"
 

@@ -191,6 +191,9 @@ class SighanReader(BaseReader):
 
         train_source_path = path_head + "/train.src"
         train_target_path = path_head + "/train.tgt"
+
+        test13_source_path = path_head + "/test13.src"
+        test13_target_path = path_head + "/test13.tgt"
         valid_source_path = path_head + "/valid14.src"
         valid_target_path = path_head + "/valid14.tgt"#valid should be same to test ( sighan 15
         test_source_path = path_head + "/test.src"
@@ -202,14 +205,17 @@ class SighanReader(BaseReader):
         #train_source = shabb_reader(train_source_path)#[:2000]#[274144:]#for only sighan
         #train_target = shabb_reader(train_target_path)#[:2000]#[274144:]
 
+        test13_source = shabb_reader(test13_source_path)
+        test13_target = shabb_reader(test13_target_path)
+
         valid_source = shabb_reader(valid_source_path)
         valid_target = shabb_reader(valid_target_path)
 
         test_source = shabb_reader(test_source_path)
         test_target = shabb_reader(test_target_path)
 
-        all_source = train_source + valid_source + test_source
-        all_target = train_target + valid_target + test_target
+        all_source = train_source + test13_source + valid_source + test_source
+        all_target = train_target + test13_target + valid_target + test_target
 
         all_data = [ (all_source[i], all_target[i]) for i in range(len(all_source))]
 
@@ -234,8 +240,8 @@ class SighanReader(BaseReader):
             with open(path, 'wb') as f:
                 pickle.dump(self.map_dict, f)
         
-
         if self.is_ReaLiSe:
+            self.test13_ReaLiSe = pickle.load(open(path_ReaLiSe+"/test.sighan13.pkl", 'rb'))
             self.test14_ReaLiSe = pickle.load(open(path_ReaLiSe+"/test.sighan14.pkl", 'rb'))
             self.test15_ReaLiSe = pickle.load(open(path_ReaLiSe+"/test.sighan15.pkl", 'rb'))
 
@@ -273,7 +279,7 @@ class SighanReader(BaseReader):
         elif self.is_ReaLiSe:
             
             self.encoding = {}
-            _source = self.test14_ReaLiSe + self.test15_ReaLiSe
+            _source = self.test13_ReaLiSe + self.test14_ReaLiSe + self.test15_ReaLiSe
 
             new_source = []
             import collections

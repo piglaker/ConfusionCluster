@@ -309,40 +309,45 @@ class ConfusionClusterRunner():
 
         #print(s.shape)
 
-        preds = source_scores[1062:]#[ torch.argmax(s, dim=-1) for s in source_scores[1062:] ]
+        preds = source_scores[2062:]#[ torch.argmax(s, dim=-1) for s in source_scores[1062:] ]
+        masked_preds =  masked_scores[2062:]#[ torch.argmax(s, dim=-1) for s in masked_scores[1062:] ]
+        sources = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][2062:]
+        masked = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][2062:] 
+        labels = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][2062:]
 
-        preds14 = source_scores[:1062]#[ torch.argmax(s, dim=-1) for s in source_scores[:1062] ] 
+        preds13 = source_scores[:1000]
+        masked_preds13 = masked_scores[:1000]
+        sources13 = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][:1000]
+        masked13 = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][:1000] 
+        labels13 = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][:1000]         
 
-        masked_preds =  masked_scores[1062:]#[ torch.argmax(s, dim=-1) for s in masked_scores[1062:] ]
-
-        masked_preds14 =  masked_scores[:1062]#[ torch.argmax(s, dim=-1) for s in masked_scores[:1062] ] 
-
-        sources = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][1062:]
+        preds14 = source_scores[1000:2062]#[ torch.argmax(s, dim=-1) for s in source_scores[:1062] ] 
+        masked_preds14 =  masked_scores[1000:2062]#[ torch.argmax(s, dim=-1) for s in masked_scores[:1062] ] 
+        sources14 = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][1000:2062] 
+        masked14 = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][1000:2062]         
+        labels14 = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][1000:2062] 
         
-        sources14 = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][:1062] 
-
-        masked = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][1062:] 
-
-        masked14 = [ i[self.reader.input_token] for i in self.reader.encoding["masked"] ][:1062] 
-
-        labels = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][1062:]
-
-        labels14 = [ i[self.reader.label_token] for i in self.reader.encoding["source"] ][:1062] 
-
         # print(sources[0])
         # print(preds[0])
         # print(masked_preds[0])
         # print(labels[0])
 
-        # print(self.reader.tokenizer.decode(sources[1]))
-        # print(self.reader.tokenizer.decode(preds[1]))
-        # print(self.reader.tokenizer.decode(masked_preds[1]))
-        # print(self.reader.tokenizer.decode(labels[1]))
+        #print(self.reader.tokenizer.decode(sources[1]))
+        #print(self.reader.tokenizer.decode(preds[1]))
+        #print(self.reader.tokenizer.decode(masked_preds[1]))
+        #print(self.reader.tokenizer.decode(labels[1]))
+        #exit()
+        
+        print("{13:")
+        self.metric((sources13, preds13, labels13))
+        print("{13 mask:")
+        self.metric((masked13, masked_preds13, labels13))
 
         print("{14:")
         self.metric((sources14, preds14, labels14))
         print("{14 mask:")
         self.metric((masked14, masked_preds14, labels14))
+        
         print("{15")
         self.metric((sources, preds, labels))
         print("{15 mask")
@@ -382,9 +387,11 @@ class ConfusionClusterRunner():
 
             src, tmp,  label = cls2sep(src), cls2sep(tmp), cls2sep(label) 
 
-            #print(src, tmp, label)
+            #print(src)
+            #print(tmp)
+            #print(label)
             #print(self.reader.tokenizer.decode(src))
-            #print(self.reader.tokenizer.decode([i[0] for i in tmp]))
+            #print(self.reader.tokenizer.decode([i.item() for i in tmp]))
             #print(self.reader.tokenizer.decode(label)) 
             #exit()
 
