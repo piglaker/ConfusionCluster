@@ -444,9 +444,8 @@ class ConfusionClusterRunner():
                 sent_p += 1
                 d_sent_p += 1
                 #if (res == label.shape[0]):
-                print((src != label).int(), (src != pred).int())
-                exit()
-                if (src != label).int() == (src != pred).int():
+                
+                if ((src != label).int() == (src != pred).int()).all():
                     d_tp += 1
                 
                 if self.topk > 1:
