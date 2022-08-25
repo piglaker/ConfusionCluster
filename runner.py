@@ -145,6 +145,20 @@ class ConfusionClusterRunner():
 
         source_set, _, masked_set = self.reader.get_dataset()
 
+        if self.reader.is_ReaLiSe:
+            def trans2mydataset(some_set):
+                new = []
+                for feature in some_set:
+                    tmp = {}
+                    tmp["input_ids"] = feature["src_idx"][:128]
+                    tmp["labels"] = feature["tgt_idx"][:128]
+                    tmp["attention_mask"] = ([1] * len(tmp["input_ids"]))[:128]#feature["lengths"])[:128]
+                    new.append(tmp)
+        
+                return new
+
+            source_set, masked_set = trans2mydataset(source_set), trans2mydataset(masked_set)
+
         source_host = []
 
         self.model.eval()
@@ -339,9 +353,9 @@ class ConfusionClusterRunner():
         #exit()
         
         print("{13:")
-        self.metric((sources13, preds13, labels13))
+        self.metric((sources13, preds13, labels13), need_postpre=True)
         print("{13 mask:")
-        self.metric((masked13, masked_preds13, labels13))
+        self.metric((masked13, masked_preds13, labels13), need_postpre=True)
 
         print("{14:")
         self.metric((sources14, preds14, labels14))
@@ -355,7 +369,11 @@ class ConfusionClusterRunner():
 
         return
 
-    def metric(self, input):
+    def get_sim(self, i):
+        confusion = self.confusion_reader[self.reader.tokenizer.decode(i)]
+        return [ self.reader.tokenizer.convert_tokens_to_ids(j) for j in confusion]
+
+    def metric(self, input, need_postpre=False):
         """
         """
         #from core import _get_metrics
@@ -366,26 +384,37 @@ class ConfusionClusterRunner():
         sources, preds, labels = input
 
         tp, sent_p, sent_n = 0, 0, 0
+        d_tp, d_sent_p, d_sent_n = 0, 0, 0
 
         pair = {}
 
         for j in range(len(sources)):
-            
-            topk = torch.softmax(preds[j], dim=1).topk(self.topk, dim=1)[-1]#.T.reshape(5, -1) )
+            #得，地，的 4638, 1765, 2533
+            logits = torch.softmax(preds[j], dim=1)
 
-            src, top5, label = torch.tensor(sources[j]), topk, torch.tensor(labels[j])
+            topk = torch.topk(logits, self.topk)[-1]
+
+            src, topk, label = torch.tensor(sources[j]), topk, torch.tensor(labels[j])
                     
             #if self.model.find("ReaLiSe") >= 0:
             #    tmp = tmp[1:label.shape[0]-1, :]
             #    src = src[1:label.shape[0]-1]
             #    label = label[1:label.shape[0]-1]
 
-            tmp = top5[:, 0]
+            tmp = topk[:, 0]
 
             def cls2sep(x):
                 return torch.where(x != 101, x , 102)
 
-            src, tmp,  label = cls2sep(src), cls2sep(tmp), cls2sep(label) 
+            src, tmp, label = cls2sep(src), cls2sep(tmp), cls2sep(label) 
+
+            def postpre(x):
+                x = torch.where(x != 4638, x, 2533)
+                x = torch.where(x != 1765, x, 2533)
+                return x
+            
+            if need_postpre:
+                src, tmp, label = postpre(src), postpre(tmp), postpre(label)
 
             #print(src)
             #print(tmp)
@@ -413,20 +442,46 @@ class ConfusionClusterRunner():
 
             if ( pred != src ).any() :
                 sent_p += 1
+                d_sent_p += 1
                 #if (res == label.shape[0]):
-                if (pred == label).all(): 
-                    tp += 1
+                print((src != label).int(), (src != pred).int())
+                exit()
+                if (src != label).int() == (src != pred).int():
+                    d_tp += 1
+                
+                if self.topk > 1:
+                    new_pred = []
+                    for i in range(len(src)):
+                        if pred[i] != src[i]:
+                            confusion = self.get_sim(src[i])
+                            for j in range(len(topk[i])):
+                                if topk[i][j] in confusion:
+                                    new_pred.append(topk[i][j])
+                                    break
+                            else:
+                                new_pred.append(pred[i])
+                        else:
+                            new_pred.append(pred[i])
+                    if (torch.tensor(new_pred) == label).all():
+                        tp += 1 
+                else:
+                    if (pred == label).all(): 
+                        tp += 1
 
             if ( src != label).any():
                 sent_n += 1
+                d_sent_n += 1
+
+        d_p = d_tp / (d_sent_p + 1e-10)
+        d_r = d_tp / (d_sent_n + 1e-10)
+        d_f1 = 2 * d_p * d_r / (d_p + d_r + 1e-10)
 
         precision = tp / (sent_p + 1e-10)
-
         recall = tp / (sent_n + 1e-10)
-
         F1_score = 2 * precision * recall / (precision + recall + 1e-10)
 
-        print("pre: ", precision, "recall: ", recall, "F1: ", F1_score)
+        print("pre: ", precision, "recall: ", recall, "F1: ", F1_score, "d_pre:", d_p, "d_recall:", d_r, "d_f1:",d_f1)
+
         return 
 
     def calculate_similarity(self, hiddens):

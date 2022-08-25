@@ -64,6 +64,12 @@ class ConfusionSetReader(BaseReader):
         
         self.vocab = None
 
+    def __getitem__(self, k):
+        assert self.graph, "Error: Empty Graph" 
+        if k in self.graph:
+            return self.graph[k]
+        else:
+            return []
 
     def run(self):
         """
@@ -296,6 +302,9 @@ class SighanReader(BaseReader):
 
             self.encoding["source"] = _source
         
+            _target = []
+            self.encoding["target"] = _target
+
             masked = [ ]
 
             for i, element in enumerate(_source):

@@ -57,7 +57,7 @@ class Logger(object):
 
 def main():
     # Args
-    topk = 1
+    topk = 5
 
     # Model
 
@@ -125,9 +125,15 @@ def main():
 
     ]
 
+
+    name_list_6 = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0.007_repeat1_eval15_epoch20_bs48_seed3471_multi_taskFalse_v1",   
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0.01_repeat1_eval15_epoch20_bs48_seed3471_multi_taskFalse_weight0.01_v1",
+    ]
+
     #name = name_list[0]
  
-    name = name_list_2[2]
+    #name = name_list_2[2]
 
     #name = name_list_3[-1]
 
@@ -135,7 +141,7 @@ def main():
 
     #name = name_list_5[2]
 
-    #name = name_list_6[0]
+    name = name_list_6[-1]
 
     output_path = "./logs/"+ name.replace("/", "_") + "_topk_" + str(topk) +".txt"
 
@@ -149,7 +155,12 @@ def main():
         model = name # we hack
     elif 'chinesebert' in name or "ChineseBert" in name:
         config = ChineseBertConfig.from_pretrained(name)
-        model = ChineseBertForMaskedLM.from_pretrained(name, config=config) 
+        model = ChineseBertForMaskedLM.from_pretrained(name, config=config)
+    elif "Proto" in name:
+        from models.modeling_bert_v4 import ProtoModel_v3 as ProtoModel
+        import torch
+        model = ProtoModel("hfl/chinese-macbert-base", None)
+        model.load_state_dict(torch.load("/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0.007_repeat1_eval15_epoch20_bs48_seed3471_multi_taskFalse_weight0.05_v1/pytorch_model.bin"))
     else:
         model = BertForMaskedLM.from_pretrained(name)
 
