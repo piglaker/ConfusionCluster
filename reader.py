@@ -170,6 +170,11 @@ class SighanReader(BaseReader):
     def __init__(self, tokenizer_model_name_path):
         """
         """
+        #
+        self.confusion_reader = ConfusionSetReader()
+
+        self.confusion_reader.run()
+
         print("[INFO] [Reader] ", tokenizer_model_name_path) 
 
         self.tokenizer_model_name_path = tokenizer_model_name_path#"junnyu/ChineseBERT-base" 
@@ -265,17 +270,38 @@ class SighanReader(BaseReader):
 
         self.init_dataset()
 
+
+    def get_confusion_set(self, _source):
+
+        confusion = [ ]
+
+        for i, element in enumerate(_source):
+            src, tgt = [ o for o in element[self.input_token]], [ o for o in element[self.label_token]]
+            new = [ j for j in element[self.input_token] ]
+            for j, char in enumerate(src):
+                if char != tgt[j]:
+                    if self.tokenizer.decode(char) in self.confusion_reader.confusion:
+                        import random
+                        confusion_x = random.choice(self.confusion_reader.confusion[self.tokenizer.decode(char)])
+                        new[j] = self.tokenizer.convert_tokens_to_ids(confusion_x)
+                    else:
+                        new[j] = random.randint(671, 7662)
+
+            confusion.append(new) 
+
+        return confusion
+
     def init_dataset(self):
         """
         """
         print("[INFO] [Reader] [Init_dataset]")
         
         if self.is_chinesebert :
-            path = "encodings3.pkl"
+            path = "encodings_chinesebert.pkl"
         elif self.is_ReaLiSe:
-            path = "encodings4.pkl"
+            path = "encodings_realise.pkl"
         else:
-            path = "encodings2.pkl"
+            path = "encodings_raw.pkl"
 
         if os.path.exists(path):
             with open(path, 'rb') as f:
@@ -303,25 +329,28 @@ class SighanReader(BaseReader):
             self.encoding["source"] = _source
         
             _target = []
-            self.encoding["target"] = _target
+            self.encoding["target"] = self.source2target(_source)
 
             masked = [ ]
-
             for i, element in enumerate(_source):
                 src, tgt = [ o for o in element[self.input_token]], [ o for o in element[self.label_token]]
                 new = [ j for j in element[self.input_token] ]
                 for j, char in enumerate(src):
                     if char != tgt[j]:
                         new[j] = 103
-
                 masked.append(new) 
-
             from copy import deepcopy
             self.masked = deepcopy(_source)
             for i in range(len(self.masked)):
                 self.masked[i][self.input_token] =  masked[i]
-
             self.encoding["masked"] = self.masked
+
+            confusion = self.get_confusion_set(_source)
+            self.confusion = deepcopy(_source)
+            for i in range(len(self.confusion)):
+                self.confusion[i][self.input_token] =  confusion[i]
+
+            self.encoding["confusion"] = self.confusion
 
             with open(path, 'wb') as f:
                 pickle.dump(self.encoding, f)
@@ -349,6 +378,14 @@ class SighanReader(BaseReader):
             self.encoding["source"] = self.transpose(source_set, truncation=truncation)
             self.encoding["target"] = self.transpose(target_set, truncation=truncation)
             self.encoding["masked"] = self.transpose(masked_set, truncation=truncation)
+            
+            confusion = self.get_confusion_set(self.encoding["source"])
+            from copy import deepcopy
+            self.confusion = deepcopy(self.encoding["source"])
+            for i in range(len(self.confusion)):
+                self.confusion[i][self.input_token] =  confusion[i]
+            
+            self.encoding["confusion"] = self.confusion
 
             with open(path, 'wb') as f:
                 pickle.dump(self.encoding, f)
@@ -358,8 +395,8 @@ class SighanReader(BaseReader):
         #self.calculate_groundtruth()
 
     def get_dataset(self):
-
-        return self.encoding["source"], self.encoding["target"], self.encoding["masked"]
+        # ["source"] ["target"] ["masked"] ["confusion"]
+        return self.encoding
 
     def calculate_groundtruth(self):
         """
@@ -442,7 +479,16 @@ class SighanReader(BaseReader):
         with open("./models/realise/masked.pkl", "wb") as f:
             pickle.dump(new_masked, f)
 
-
+    def source2target(self, source):
+        target = []
+        for feature in source:
+            tmp = {}
+            tmp["src_idx"] = feature["tgt_idx"][:128]
+            tmp["tgt_idx"] = []#feature["tgt_idx"][:128]
+            tmp["attention_mask"] = ([1] * len(tmp["src_idx"]))[:128]#feature["lengths"])[:128]                
+            target.append(tmp)
+        
+        return target
 
 def test():
     """

@@ -185,12 +185,12 @@ class FoolDataCollatorForSeq2Seq:
 
         f_copy = deepcopy(features)
 
-        shared_max_length = max([ len(i['input_ids']) for i in f_copy] + [len(i['labels']) for i in f_copy] )
+        shared_max_length = 128#max([ len(i['input_ids']) for i in f_copy] + [len(i['labels']) for i in f_copy] )
 
         def simple_pad(f_copy, key):
             f_key = [ f[key] for f in f_copy ]
             if f_key is not None:
-                max_length = max(len(l) for l in f_key)
+                max_length = 128 #max(len(l) for l in f_key)
 
                 padding_side = "right"
 

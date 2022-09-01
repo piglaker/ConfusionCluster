@@ -36,9 +36,9 @@ class ConfusionClusterRunner():
         
         self.reader = reader
 
-        self.confusion_reader = confusion_reader
+        self.confusion_reader = self.reader.confusion_reader
 
-        self.confusion_reader.run()
+        #self.confusion_reader.run()
 
         self.data_collator = data_collator
 
@@ -55,7 +55,7 @@ class ConfusionClusterRunner():
     def single_step(self, batch):
         """
         """
-
+    
         BertOutput = self.model(
             **batch,
             return_dict=True, 
@@ -83,10 +83,22 @@ class ConfusionClusterRunner():
         """
         """
         print("[INFO] [Runner] [Forward]")
+        encodings = self.reader.get_dataset()
+        source_set, target_set, confusion_set = encodings["source"], encodings["target"], encodings["confusion"]
 
-        source_set, target_set = self.reader.get_dataset()
+        if self.reader.is_ReaLiSe:
+            def trans2mydataset(some_set):
+                new = []
+                for feature in some_set:
+                    tmp = {}
+                    tmp["input_ids"] = feature["src_idx"][:128]
+                    tmp["labels"] = feature["tgt_idx"][:128]
+                    tmp["attention_mask"] = ([1] * len(tmp["input_ids"]))[:128]#feature["lengths"])[:128]
+                    new.append(tmp)
+        
+                return new
 
-        source_host = []
+            source_set, target_set, confusion_set = trans2mydataset(source_set), trans2mydataset(target_set), trans2mydataset(confusion_set)
 
         self.model.eval()
 
@@ -104,21 +116,34 @@ class ConfusionClusterRunner():
                 collate_fn=self.data_collator,
         )
 
+        confusion_dataloader = DataLoader(
+            confusion_set,
+            batch_size=self.batch_size,
+            collate_fn=self.data_collator,
+        )
+
+        source_host = torch.tensor([])
+
         for inputs in tqdm(source_dataloader ):
             inputs = self._prepare_inputs(inputs)
             hiddens = self.single_step(inputs)
+            source_host = torch.cat( (source_host, hiddens), dim=0)
 
-            source_host += hiddens
-
-        target_host = []
+        target_host = torch.tensor([])
 
         for inputs in tqdm( target_dataloader ):
             inputs = self._prepare_inputs(inputs)
             hiddens = self.single_step(inputs)
+            target_host = torch.cat( (target_host, hiddens), dim=0)
 
-            target_host += hiddens
+        confusion_host = torch.tensor([])
 
-        return source_host, target_host
+        for inputs in tqdm( confusion_dataloader ):
+            inputs = self._prepare_inputs(inputs)
+            hiddens = self.single_step(inputs)
+            confusion_host = torch.cat( (confusion_host, hiddens), dim=0)
+
+        return source_host, target_host, confusion_host
 
     def predict(self):
         """
@@ -143,7 +168,8 @@ class ConfusionClusterRunner():
 
             return source_host, masked_host
 
-        source_set, _, masked_set = self.reader.get_dataset()
+        encodings = self.reader.get_dataset()
+        source_set, target_set, masked_set = encodings["source"], encodings["target"], encodings["masked"]
 
         if self.reader.is_ReaLiSe:
             def trans2mydataset(some_set):
@@ -210,9 +236,6 @@ class ConfusionClusterRunner():
             masked_score = masked_scores[i]
 
             result_host = []
-
-            # print(masked_score[0].shape)
-            # exit()
 
             for j in range(len(source)):
                 x = source[j]
@@ -319,10 +342,6 @@ class ConfusionClusterRunner():
 
         print("TopK:", self.topk)
 
-        #s = torch.tensor(source_scores)
-
-        #print(s.shape)
-
         preds = source_scores[2062:]#[ torch.argmax(s, dim=-1) for s in source_scores[1062:] ]
         masked_preds =  masked_scores[2062:]#[ torch.argmax(s, dim=-1) for s in masked_scores[1062:] ]
         sources = [ i[self.reader.input_token] for i in self.reader.encoding["source"] ][2062:]
@@ -376,11 +395,6 @@ class ConfusionClusterRunner():
     def metric(self, input, need_postpre=False):
         """
         """
-        #from core import _get_metrics
-        #computer = _get_metrics()
-        #evaluate_result = computer(input)
-        #print(evaluate_result)
-
         sources, preds, labels = input
 
         tp, sent_p, sent_n = 0, 0, 0
@@ -489,14 +503,26 @@ class ConfusionClusterRunner():
         """
         print("[INFO] [Runner] [Calculate_Similarity] ")
 
-        source_hiddens, target_hiddens = hiddens
+        source_hiddens, target_hiddens, confusion_hiddens = hiddens
+        # Euclidean normalize:https://pytorch.org/docs/stable/generated/torch.nn.functional.normalize.html
+
+        #print(torch.tensor(source_hiddens).shape)
+
+        #print(torch.tensor(target_hiddens).shape)
+        #exit()
+        source_hiddens, target_hiddens, confusion_hiddens = torch.nn.functional.normalize(source_hiddens, dim=2), \
+            torch.nn.functional.normalize(target_hiddens,dim=2), \
+                torch.nn.functional.normalize(confusion_hiddens,dim=2) 
 
         cos = nn.CosineSimilarity(dim=0, eps=1e-16)
+
+        l_align, l_uniform = 0, 0
 
         for i in tqdm(range(len(self.reader.data))):
             source, target = self.reader.encoding["source"][i][self.reader.input_token], self.reader.encoding["target"][i][self.reader.input_token]
 
             for j in range(len(source)):
+
                 if source[j] != target[j]:
                     try:
                         a = source_hiddens[i][j]
@@ -504,15 +530,30 @@ class ConfusionClusterRunner():
                     except:
                         print(source)
                         exit()
+                    
                     key =  (self.reader.tokenizer.decode(source[j]), self.reader.tokenizer.decode(target[j]))
 
                     value = cos(a, b)
+                     
+                    l_align += (a - b).pow(2).mean()
+                    #l_uniform += (a - b).pow(2).mul(-2).exp().mean().log()
+                    
                     #print(value, torch.isnan(value)) 
                     if key in self.reader.map_dict:
                         if not torch.isnan(value):
                             self.reader.map_dict[key].append(value.numpy().tolist())
+                
+                    #a = source_hiddens[i][j]
+                    y = confusion_hiddens[i]
+                    import random
+                    #r = random.choice( [ i for i in range(len(y)) if i != j ] )
+                    b = y[j]
+                    l_uniform += ( a - b).pow(2).mul(-2).exp().mean().log()
 
-        return
+        print("[Contrastive] l_align: ", l_align.mean())
+        print("[Contrastive] l_uniform:", l_uniform.mean())
+
+        return 
 
     def calculate_score(self, result):
         """
@@ -545,10 +586,10 @@ class ConfusionClusterRunner():
         """
 
         # forward 
-        #hiddens = self.forward()
+        hiddens = self.forward()
 
         # similarity
-        #result = self.calculate_similarity(hiddens)
+        result = self.calculate_similarity(hiddens)
 
         #for k,v in self.reader.map_dict.items():
             #print(k, v)
@@ -556,7 +597,7 @@ class ConfusionClusterRunner():
 
         # Score
         #score = self.calculate_score(result)
- 
+        
         #1.Predict
         scores = self.predict()
 

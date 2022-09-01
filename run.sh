@@ -6,7 +6,6 @@ num_gpus=1
 
 count=0
 
-gtx1080=10240
 gtx3090=20480
 
 available_gpus=""
@@ -15,7 +14,7 @@ batch_size=48
 
 for i in "${!gpu_memory[@]}";   
 do   
-    if [ "${gpu_memory[$i]}" -gt "$gtx1080" ]
+    if [ "${gpu_memory[$i]}" -gt "$gtx3090" ]
     then
         available_gpus="$available_gpus$i,"
         let count+=1
