@@ -127,10 +127,17 @@ def main():
 
 
     name_list_6 = [
-        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0_repeat0_eval15_epoch20_bs48_seed32_multi_taskFalse_weight0_v2",   
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0_repeat0_eval15_epoch20_bs48_seed32_multi_taskFalse_weight0_v2",
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0_repeat0_eval15_epoch20_bs48_seed91_multi_taskFalse_weight0_v2", 
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0.0025_repeat1_eval15_epoch20_bs48_seed3471_multi_taskFalse_weight0.005_v1",
         "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0.00375_repeat1_eval15_epoch20_bs48_seed3471_multi_taskFalse_weight0.005_v2", 
     ]       
+
+    name_list_cl = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_holy/Proto/roberta", 
+        
+    ]
+
 
     #name = name_list[0]
  
@@ -142,7 +149,9 @@ def main():
 
     #name = name_list_5[2]
 
-    name = name_list_6[-2]
+    #name = name_list_6[1]
+    
+    name = name_list_cl[0]
 
     output_path = "./logs/"+ name.replace("/", "_") + "_topk_" + str(topk) +".txt"
 
