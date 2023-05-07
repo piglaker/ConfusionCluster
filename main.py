@@ -138,6 +138,9 @@ def main():
         
     ]
 
+    name_list_cl_abla = [
+        "/remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_ReaLiSe/Proto/macbert/Proto_cls_copy0_cl0_repeat0_eval15_epoch20_bs48_seed91_multi_taskFalse_weight0_v2"
+    ]
 
     #name = name_list[0]
  
@@ -149,9 +152,12 @@ def main():
 
     #name = name_list_5[2]
 
-    #name = name_list_6[1]
+    name = name_list_6[1]
     
-    name = name_list_cl[0]
+    #name = name_list_cl_abla[0]
+
+    #set the name to your self pretrained model to test here
+    # name = "your pretrained model dir"
 
     output_path = "./logs/"+ name.replace("/", "_") + "_topk_" + str(topk) +".txt"
 

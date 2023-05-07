@@ -510,9 +510,9 @@ class ConfusionClusterRunner():
 
         #print(torch.tensor(target_hiddens).shape)
         #exit()
-        source_hiddens, target_hiddens, confusion_hiddens = torch.nn.functional.normalize(source_hiddens, dim=2), \
-            torch.nn.functional.normalize(target_hiddens,dim=2), \
-                torch.nn.functional.normalize(confusion_hiddens,dim=2) 
+        source_hiddens, target_hiddens, confusion_hiddens = torch.nn.functional.normalize(source_hiddens, dim=1), \
+            torch.nn.functional.normalize(target_hiddens,dim=1), \
+                torch.nn.functional.normalize(confusion_hiddens,dim=1) 
 
         cos = nn.CosineSimilarity(dim=0, eps=1e-16)
 

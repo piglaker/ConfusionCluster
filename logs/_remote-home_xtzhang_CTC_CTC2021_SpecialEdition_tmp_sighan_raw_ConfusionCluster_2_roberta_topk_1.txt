@@ -1,0 +1,24 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/roberta
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/roberta
+is_chinese False
+is_ReaLiSe False
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+Load Cache ... encodings2.pkl
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.9422799422799423 [baseline] tensor(0.2024) [Bad_MLM and Good_Correction]: 0.4436141304347826 [Bad_MLM]: 0.47078804347826086 [Good_Correction]: 0.9721467391304348
+[INFO] [Runner] [Evaluate]
+TopK: 1
+{14:
+pre:  0.6405109489049926 recall:  0.6763005780345517 F1:  0.657919400137355
+{14 mask:
+pre:  0.404040404040336 recall:  0.4624277456646507 F1:  0.4312668463113355
+{15
+pre:  0.7395104895103601 recall:  0.7804428044279003 F1:  0.7594254936662372
+{15 mask
+pre:  0.43427620632272307 recall:  0.4815498154980661 F1:  0.45669291333588
