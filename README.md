@@ -7,11 +7,11 @@
 
 ## Environment setting
 
-python >= 3.7 \
+python >= 3.7  
 
 
-`conda create -n ctcSE python=3.7` 
-`conda activate ctcSE` \
+`conda create -n ctcSE python=3.7`  
+`conda activate ctcSE`  
 
 ```
 pip install -r requirements.txt
