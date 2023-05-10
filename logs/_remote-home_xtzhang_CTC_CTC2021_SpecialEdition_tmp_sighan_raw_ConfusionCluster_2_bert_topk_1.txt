@@ -1,0 +1,24 @@
+Model: /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/bert
+[INFO] [Reader]  /remote-home/xtzhang/CTC/CTC2021/SpecialEdition/tmp/sighan_raw/ConfusionCluster/2/bert
+is_chinese False
+is_ReaLiSe False
+[INFO] [Reader] [Build Map]
+[INFO] [Reader] [Init_dataset]
+Load Cache ... encodings2.pkl
+[INFO] [Reader] [Building Confusion]
+[INFO] [Reader] [Building Graph]
+[INFO] [Reader] [Init Vocab]
+[INFO] [Runner] [Predict]
+[INFO] [Runner] [Estimate]
+[INFO] [Runner] [Analysis]
+[inter/mlm] 0.9568151147098516 [baseline] tensor(0.1963) [Bad_MLM and Good_Correction]: 0.48165760869565216 [Bad_MLM]: 0.5033967391304348 [Good_Correction]: 0.9775815217391305
+[INFO] [Runner] [Evaluate]
+TopK: 1
+{14:
+pre:  0.6535008976659509 recall:  0.701348747591387 F1:  0.6765799256004941
+{14 mask:
+pre:  0.37666666666660387 recall:  0.43545279383421276 F1:  0.40393208216645426
+{15
+pre:  0.7417102966839891 recall:  0.7841328413282685 F1:  0.7623318385149243
+{15 mask
+pre:  0.3842364532019073 recall:  0.43173431734309375 F1:  0.406602953903183
