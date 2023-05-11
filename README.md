@@ -2,7 +2,7 @@
 
 分析及CCCR Probe 指标对于ACL 2023 (Findings): [Investigating Glyph Phonetic Information for Chinese Spell Checking: What Works and What's Next](https://arxiv.org/abs/2212.04068)
 
-训练纠错模型的代码见另一github仓库:[SpecialEdition](https://github.com/piglaker/SpecialEdition)
+训练纠错模型的代码及训练数据见另一github仓库:[SpecialEdition](https://github.com/piglaker/SpecialEdition)
 论文中的Probe实验一见github仓库:[]()
 
 ## Environment setting
